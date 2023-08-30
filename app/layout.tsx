@@ -1,6 +1,8 @@
+'use client'
 import './globals.css'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
+import {  Navbar, DarkThemeToggle, Flowbite, Badge } from 'flowbite-react'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -16,7 +18,34 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <Flowbite theme={{ dark: true }}>
+          <Navbar>
+            <Navbar.Collapse>
+              <Navbar.Link href="/">
+                <Badge color="info">
+                  BitBot
+                </Badge>
+              </Navbar.Link>
+              <Navbar.Link href="/">
+                Inicio
+              </Navbar.Link>
+              <Navbar.Link href="/monedas">
+                Monedas
+              </Navbar.Link>
+              <Navbar.Link href="#">
+                Cuenta
+              </Navbar.Link>
+            </Navbar.Collapse>
+            <DarkThemeToggle />
+          </Navbar>
+          <div className='flex dark:bg-gray-900'>
+            <main className='h-screen mx-4 mt-4 mb-24'>
+              {children}
+            </main>
+          </div>
+        </Flowbite>
+      </body>
     </html>
   )
 }
