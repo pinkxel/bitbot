@@ -18,7 +18,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={inter.className + ' dark:text-white'}>
         <Flowbite theme={{ dark: true }}>
           <Navbar>
             <Navbar.Collapse>
@@ -33,7 +33,7 @@ export default function RootLayout({
               <Navbar.Link href="/monedas">
                 Monedas
               </Navbar.Link>
-              <Navbar.Link href="#">
+              <Navbar.Link href="/cuenta">
                 Cuenta
               </Navbar.Link>
             </Navbar.Collapse>
