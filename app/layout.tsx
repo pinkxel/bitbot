@@ -40,7 +40,7 @@ export default function RootLayout({
             <DarkThemeToggle />
           </Navbar>
           <div className='flex dark:bg-gray-900'>
-            <main className='h-screen mx-4 mt-4 mb-24'>
+            <main className='min-h-screen mx-4 mt-4 mb-24'>
               {children}
             </main>
           </div>
