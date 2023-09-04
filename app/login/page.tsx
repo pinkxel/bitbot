@@ -1,51 +1,62 @@
-'use client';
+'use client'
 
+import { useState } from 'react';
 import { Card, Button, Checkbox, Label, TextInput } from 'flowbite-react';
 
 export default function Login() {
+  const [apiKey, setApiKey] = useState('');
+  const [secretKey, setSecretKey] = useState('');
+
+  const handleApiKeyChange = (event) => {
+    setApiKey(event.target.value);
+  };
+
+  const handleSecretKeyChange = (event) => {
+    setSecretKey(event.target.value);
+  };
+
+  const handleLogin = () => {
+    localStorage.setItem('apiKey', apiKey);
+    localStorage.setItem('secretKey', secretKey);
+  };
+
   return (
     <Card className="max-w-md">
-      <p>Chichi</p>
+      <p>Ingreso con Binance</p>
       <form className="flex flex-col gap-8">
         <div>
           <div className="mb-2 block">
-            <Label
-              htmlFor="email1"
-              value="Your email"
-            />
+            <Label htmlFor="api-key" value="Tu API Key" />
           </div>
           <TextInput
-            id="email1"
-            placeholder="name@flowbite.com"
+            id="user-key"
+            placeholder=""
             required
-            type="email"
+            type="text"
+            value={apiKey}
+            onChange={handleApiKeyChange}
           />
         </div>
         <div>
           <div className="mb-2 block">
-            <Label
-              htmlFor="password1"
-              value="Your password"
-            />
+            <Label htmlFor="secret-key" value="Tu Secret Key" />
           </div>
           <TextInput
-            id="password1"
+            id="secret-key"
             required
             type="password"
+            value={secretKey}
+            onChange={handleSecretKeyChange}
           />
         </div>
-        <div className="flex items-center gap-2">
+        {/* <div className="flex items-center gap-2">
           <Checkbox id="remember" />
-          <Label htmlFor="remember">
-            Remember me
-          </Label>
-        </div>
-        <Button type="submit">
-          Submit
+          <Label htmlFor="remember">Remember me</Label>
+        </div> */}
+        <Button type="submit" onClick={handleLogin}>
+          Ingresar
         </Button>
       </form>
     </Card>
-  )
+  );
 }
-
-
