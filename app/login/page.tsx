@@ -2,8 +2,11 @@
 
 import { useState } from 'react';
 import { Card, Button, Checkbox, Label, TextInput } from 'flowbite-react';
+import { useRouter } from 'next/navigation';
 
 export default function Login() {
+  const router = useRouter();
+
   const [apiKey, setApiKey] = useState('');
   const [secretKey, setSecretKey] = useState('');
 
@@ -18,6 +21,7 @@ export default function Login() {
   const handleLogin = () => {
     localStorage.setItem('apiKey', apiKey);
     localStorage.setItem('secretKey', secretKey);
+    router.push('/')
   };
 
   return (
