@@ -56,12 +56,12 @@ export default function Inicio() {
 
   return (
     <Card>
-      <h2>En tu cuenta tienes:</h2>
+      <h2>¡Hola! en tu cuenta tienes:</h2>
       {/*<p className='text-4xl'>{balances.map(asset => (
           <li key={asset.asset}>{asset.asset}: {parseFloat(asset.unrealizedProfit) + parseFloat(asset.walletBalance)}</li>
       ))}</p> */}
-      <p className='text-4xl'>{balance}</p>
-      <h2>Repartido en estas monedas:</h2>
+      <p className='text-4xl'>$ {balance}</p>
+      <h2>Repartidos en estas monedas:</h2>
       <Table>
         <Table.Body>
         {balances.map((asset) => (
@@ -70,7 +70,7 @@ export default function Inicio() {
               <Link href={`/monedas/${encodeURIComponent(asset.asset)}`}>{asset.asset}</Link>
             </Table.Cell>
             <Table.Cell>
-              <Link href={`/monedas/${encodeURIComponent(asset.asset)}`}>{parseFloat(asset.free) + parseFloat(asset.locked)}</Link>
+              <Link href={`/monedas/${encodeURIComponent(asset.asset)}`}>$ {(parseFloat(asset.free) + parseFloat(asset.locked)).toFixed(2)}</Link>
             </Table.Cell>
           </Table.Row>
         ))}

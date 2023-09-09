@@ -64,13 +64,13 @@ export async function POST(request: Request, { params }: { params: { call: strin
       const balances = await client.accountInfo()
       const assets = balances.balances.filter(asset => parseFloat(asset.free) > 0 || parseFloat(asset.locked) > 0)
       // Buscar el asset que tenga el mismo asset.asset que coin
-      
+  
       const asset = assets.find(asset => asset.asset === coin)
-      console.log('assets',assets)
-      console.log('coin',coin)
+      console.log('coin', coin)
+      //console.log('coin',coin)
       
       // Devolver la suma de asset.free y asset.locked
-      return parseFloat(asset.free) + parseFloat(asset.locked)
+      return asset ? parseFloat(asset.free) + parseFloat(asset.locked) : 0
     },
     buy: async (coin, amount) => {
       // Comprar una moneda
@@ -93,11 +93,23 @@ export async function POST(request: Request, { params }: { params: { call: strin
       return order;
     },
     coins: async () => {
-      // Mostrar las monedas disponibles
-      const exchangeInfo = await client.exchangeInfo()
-      const coins = exchangeInfo.symbols.map(symbol => symbol.baseAsset)
-      return coins;
-    },
+      // Definir las monedas que quieres consultar
+      const coins = ['BTC', 'ETH']
+    
+      // Obtener los precios de mercado de todos los pares
+      const prices = await client.prices()
+    
+      // Obtener los precios de mercado de cada moneda en USDT
+      const pricesObjects = coins.map(coin => {
+        const pair = coin + 'USDT'
+        const price = parseFloat(prices[pair]).toFixed(2)
+        return {coin, price}
+      })
+    
+      // Devolver los precios como un array
+      console.log('pricesObjects', pricesObjects)
+      return pricesObjects;
+    },    
     coin: async () => {
       // Obtener el valor y los datos de una moneda específica}
       console.log('route.ts: coin', coin)

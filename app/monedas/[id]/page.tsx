@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react';
 
-
 import { Card, Button } from 'flowbite-react';
+import Link from 'next/link';
 
 export default function Page({ params }: { params: { id: string } }) {
   const [session, setSession] = useState({});
@@ -64,10 +64,10 @@ export default function Page({ params }: { params: { id: string } }) {
       <h2>¿Qué quieres hacer?</h2>
       <div className="flex gap-2">
         <Button>
-          Comprar
+          <Link href={`/comprar/${encodeURIComponent(params.id)}`}>Comprar</Link>
         </Button>
         <Button>
-          Vender
+        <Link href={`/vender/${encodeURIComponent(params.id)}`}>Vender</Link>
         </Button>
       </div>
     </Card>
