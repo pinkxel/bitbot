@@ -32,6 +32,7 @@ export async function POST(request: Request, { params }: { params: { call: strin
             //console.log('asset.asset', asset.asset)
             try {
               let assetBalance = 0
+              console.log(asset)
               if(asset.asset != 'USDT') {
                 const assetPrice = await client.prices({ symbol: asset.asset + 'USDT' })
                 
@@ -42,7 +43,8 @@ export async function POST(request: Request, { params }: { params: { call: strin
               } else {
                 assetBalance = parseFloat(asset.free) + parseFloat(asset.locked)
               }
-              totalBalance += assetBalance //* parseFloat(dollarPrice.price)
+              const price = asset.asset != 'USDT' ? await client.avgPrice({ symbol: asset.asset + 'USDT' }) : { price: 1 }
+              totalBalance += assetBalance * price.price //* parseFloat(dollarPrice.price)
             } catch (error) {
               //console.log(error)
             }
@@ -56,40 +58,84 @@ export async function POST(request: Request, { params }: { params: { call: strin
       // Obtener el balance del usuario
       const balances = await client.accountInfo()
       const assets = balances.balances.filter(asset => parseFloat(asset.free) > 0 || parseFloat(asset.locked) > 0)
+      
+      // Crear un array de objetos con el asset, el balance y el balance en USDT
+      const balancesInUSDT = await Promise.all(assets.map(async asset => {
+        // Obtener el precio de la moneda en USDT
+        const price = asset.asset != 'USDT' ? await client.avgPrice({ symbol: asset.asset + 'USDT' }) : { price: 1 }
+        
+        // Calcular el balance en USDT
+        const balanceInUSDT = (parseFloat(asset.free) + parseFloat(asset.locked)) * parseFloat(price.price) || 0
+
+        console.log('#balanceInUSDT', balanceInUSDT)
+
+        // Devolver el objeto con el asset, el balance y el balance en USDT
+        return {
+          asset: asset.asset,
+          balance: parseFloat(asset.free) + parseFloat(asset.locked),
+          balanceInUSDT: balanceInUSDT.toFixed(2)
+        }
+      }))
+      
       // Mostrar el balance en la interfaz
-      return assets;
-    },
+      return balancesInUSDT;
+    },    
     balanceOf: async () => {
       // Obtener el balance del usuario
       const balances = await client.accountInfo()
       const assets = balances.balances.filter(asset => parseFloat(asset.free) > 0 || parseFloat(asset.locked) > 0)
+      
       // Buscar el asset que tenga el mismo asset.asset que coin
-  
       const asset = assets.find(asset => asset.asset === coin)
-      console.log('coin', coin)
-      //console.log('coin',coin)
       
       // Devolver la suma de asset.free y asset.locked
-      return asset ? parseFloat(asset.free) + parseFloat(asset.locked) : 0
+      const balance = asset ? parseFloat(asset.free) + parseFloat(asset.locked) : 0
+      
+      // Obtener el precio de la moneda en USDT
+      const price = coin != 'USDT' ? await client.avgPrice({ symbol: coin + 'USDT' }) : { price: 1 }
+      
+      console.log('balance', balance, price)
+      console.log((balance * parseFloat(price.price)).toFixed(2))
+      // Devolver el balance convertido a USDT
+      return (balance * parseFloat(price.price)).toFixed(2)
+    },    
+    available: async () => {
+      // Obtener el balance del usuario
+      const balance = await client.accountInfo()
+      // Buscar el activo que corresponde a la moneda
+      const asset = balance.balances.find(asset => asset.asset === coin)
+      console.log('//AA', asset);
+      // Si no se encuentra el activo, retornar cero
+      if (!asset) return 0
+      // Si se encuentra el activo, sumar el saldo libre y el saldo bloqueado
+      const free = parseFloat(asset.free)
+      const locked = parseFloat(asset.locked)
+      const total = free + locked
+      // Retornar el total
+      return total.toFixed(2)
     },
     buy: async (coin, amount) => {
+      console.log('session', session)
+      console.clear()
       // Comprar una moneda
       const order = await client.order({
-        symbol: coin,
+        symbol: coin + 'USDT',
         side: 'BUY',
         quantity: amount,
         type: 'MARKET'
       })
+      console.log('order', order)
       return order;
     },
     sell: async (coin, amount) => {
       // Vender una moneda
       const order = await client.order({
-        symbol: coin,
+        symbol: coin + 'USDT',
         side: 'SELL',
         quantity: amount,
         type: 'MARKET'
       })
+      console.log('order', order)
       return order;
     },
     coins: async () => {
@@ -102,7 +148,7 @@ export async function POST(request: Request, { params }: { params: { call: strin
       // Obtener los precios de mercado de cada moneda en USDT
       const pricesObjects = coins.map(coin => {
         const pair = coin + 'USDT'
-        const price = parseFloat(prices[pair]).toFixed(2)
+        const price = coin != 'USDT' ?parseFloat(prices[pair]).toFixed(2) : 1
         return {coin, price}
       })
     

@@ -58,7 +58,7 @@ export default function Page({ params }: { params: { id: string } }) {
     <Card>
       <h1>{params.id}</h1>
       <h2>Precio actual</h2>
-      <p>$ {coin}</p>
+      <p className='text-4xl'>$ {coin}</p>
       <h2>Cuánto tienes en {params.id}</h2>
       <p>$ {balanceOf}</p>
       <h2>¿Qué quieres hacer?</h2>

@@ -70,7 +70,7 @@ export default function Inicio() {
               <Link href={`/monedas/${encodeURIComponent(asset.asset)}`}>{asset.asset}</Link>
             </Table.Cell>
             <Table.Cell>
-              <Link href={`/monedas/${encodeURIComponent(asset.asset)}`}>$ {(parseFloat(asset.free) + parseFloat(asset.locked)).toFixed(2)}</Link>
+              <Link href={`/monedas/${encodeURIComponent(asset.asset)}`}>$ {asset.balanceInUSDT}</Link>
             </Table.Cell>
           </Table.Row>
         ))}
