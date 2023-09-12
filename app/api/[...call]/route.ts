@@ -15,7 +15,7 @@ export async function POST(request: Request, { params }: { params: { call: strin
   const amount = req.amount ?? ''
   const client = Binance({ apiKey: session.apiKey, apiSecret: session.secretKey })
 
-  const ip = request.headers.get('x-forwarded-for')
+  const ip = request.headers.get('x-real-ip')
   console.log(`La dirección IP de la solicitud es ${ip}`)
 
   const calls = {
