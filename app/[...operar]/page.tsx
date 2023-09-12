@@ -1,16 +1,18 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Card, Button, Label, RangeSlider, TextInput } from 'flowbite-react'
+import { Card, Button, Label, RangeSlider, TextInput, Modal } from 'flowbite-react'
 
 export default function Page({ params }: { params: { operar: string } }) {
-  const [session, setSession] = useState({});
-  const [balanceOf, setBalanceOf] = useState('--');
-  const [available, setAvailable] = useState('--');
-  const [amount, setAmount] = useState(0);
+  const [session, setSession] = useState({})
+  const [balanceOf, setBalanceOf] = useState('--')
+  const [available, setAvailable] = useState('--')
+  const [amount, setAmount] = useState(0)
   const [coin, setCoin] = useState('--')
+  const [openModal, setOpenModal] = useState<string | undefined>()
+  const props = { openModal, setOpenModal }
 
-  useEffect(() => {
+  async function fetchData() {
     const apiKey = localStorage.getItem('apiKey')
     const secretKey = localStorage.getItem('secretKey')
     setSession({ apiKey, secretKey });
@@ -48,7 +50,7 @@ export default function Page({ params }: { params: { operar: string } }) {
       }
     }
     async function fetchCoin(apiKey, secretKey) {
-      try {
+      try { 
         const response = await fetch('/api/coin', {
           method: 'POST',
           headers: {
@@ -66,6 +68,10 @@ export default function Page({ params }: { params: { operar: string } }) {
     fetchCoin(apiKey, secretKey)
     fetchBalanceOf(apiKey, secretKey)
     fetchAvailable(apiKey, secretKey)
+  }
+
+  useEffect(() => {
+    fetchData()
   }, [])
   
   // Función auxiliar para llamar a la API según el valor de params.operar[0]
@@ -90,7 +96,7 @@ export default function Page({ params }: { params: { operar: string } }) {
       });
       // Obtener la respuesta de la API y mostrarla por consola
       const data = await response.json();
-      console.log(data);
+      console.log(data)
     } catch (error) {
       console.error(error);
     }
@@ -99,9 +105,9 @@ export default function Page({ params }: { params: { operar: string } }) {
   return (
     <Card>
       <h1>{params.operar[1]}</h1>
-      <h2>En esta moneda tienes</h2>
+      <h2>En esta moneda tienes:</h2>
       <p>$ {balanceOf}</p>
-      <h2>¿Cuánto quieres comprar?  </h2>
+      <h2>¿Cuánto quieres {params.operar[0]}?  </h2>
       <Label htmlFor="range" value={`Disponibles $ ${params.operar[0] == 'comprar' ? available : balanceOf}`}/>
       <TextInput
         id="amount"
@@ -127,9 +133,31 @@ export default function Page({ params }: { params: { operar: string } }) {
       />
       <p>Igual a { (amount / parseFloat(coin)).toFixed(4) } {params.operar[1]}</p>
       <div className="flex gap-2">
-      <Button className="capitalize" onClick={() => handleOperation(session.apiKey, session.secretKey, params.operar[1], (amount / parseFloat(coin)).toFixed(4))}>
+      <Button className="capitalize" onClick={() => props.setOpenModal('pop-up')}>
         {params.operar[0]}
       </Button>
+      <Modal show={props.openModal === 'pop-up'} size="md" popup onClose={() => props.setOpenModal(undefined)}>
+        <Modal.Header />
+        <Modal.Body>
+          <div className="text-center">
+            <h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
+              ¿Está seguro que desea {params.operar[0]}?
+            </h3>
+            <div className="flex justify-center gap-4">
+              <Button onClick={() => {
+                handleOperation(session.apiKey, session.secretKey, params.operar[1], (amount / parseFloat(coin)).toFixed(4))
+                fetchData()
+                props.setOpenModal(undefined)
+              }}>
+                Si, estoy seguro
+              </Button>
+              <Button color="gray" onClick={() => props.setOpenModal(undefined)}>
+                No, cancelar
+              </Button>
+            </div>
+          </div>
+        </Modal.Body>
+      </Modal>
       </div>
     </Card>
   )

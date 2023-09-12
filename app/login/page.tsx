@@ -18,7 +18,8 @@ export default function Login() {
     setSecretKey(event.target.value);
   };
 
-  const handleLogin = () => {
+  const handleLogin = (event) => {
+    event.preventDefault()
     localStorage.setItem('apiKey', apiKey);
     localStorage.setItem('secretKey', secretKey);
     router.push('/')

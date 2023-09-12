@@ -10,12 +10,14 @@ export default function Page({ params }: { params: { id: string } }) {
   const [coin, setCoin] = useState('--')
   const [balances, setBalances] = useState([]);
   const [balanceOf, setBalanceOf] = useState('--');
+  const isUSDT = params.id === 'USDT' ? 'hidden' : ''
 
   useEffect(() => {
     console.log('params', params)
     const apiKey = localStorage.getItem('apiKey')
     const secretKey = localStorage.getItem('secretKey')
     const { id } = params
+
     setSession({ apiKey, secretKey });
 
     async function fetchCoin(apiKey, secretKey) {
@@ -57,12 +59,12 @@ export default function Page({ params }: { params: { id: string } }) {
   return (
     <Card>
       <h1>{params.id}</h1>
-      <h2>Precio actual</h2>
-      <p className='text-4xl'>$ {coin}</p>
-      <h2>Cuánto tienes en {params.id}</h2>
+      <h2 className={`${isUSDT}`}>Precio actual:</h2>
+      <p className={`text-4xl ${isUSDT}`}>$ {coin}</p>
+      <h2>Cuánto tienes en {params.id}:</h2>
       <p>$ {balanceOf}</p>
-      <h2>¿Qué quieres hacer?</h2>
-      <div className="flex gap-2">
+      <h2 className={`${isUSDT}`}>¿Qué quieres hacer?</h2>
+      <div className={`flex gap-2 ${isUSDT}`}>
         <Button>
           <Link href={`/comprar/${encodeURIComponent(params.id)}`}>Comprar</Link>
         </Button>
