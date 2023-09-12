@@ -8,9 +8,9 @@ export async function POST(request: Request, { params }: { params: { call: strin
   const { call } = params;
   // Obtener la sesión del usuario
   //const session = useSession()
-  //const session = { apiKey: process.env.KEY, apiSecret: process.env.SECRET }
+  const session = { apiKey: process.env.KEY, secretKey: process.env.SECRET }
   // Crear un cliente autenticado con la clave API y la clave secreta del usuario
-  const session = req.session
+  //const session = req.session
   const coin = req.coin ?? ''
   const amount = req.amount ?? ''
   const client = Binance({ apiKey: session.apiKey, apiSecret: session.secretKey })
