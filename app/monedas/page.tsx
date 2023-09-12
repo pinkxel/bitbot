@@ -12,7 +12,7 @@ export default function Monedas() {
     const apiKey = localStorage.getItem('apiKey')
     const secretKey = localStorage.getItem('secretKey')
 
-    async function fetchCoins(apiKey, secretKey) {
+    async function fetchCoins(apiKey : string, secretKey : string) {
       try {
         const response = await fetch('/api/coins', {
           method: 'POST',
@@ -37,7 +37,7 @@ export default function Monedas() {
       <Table>
         <Table.Body className="dark:border-gray-700">
         {coins.map((coin) => (
-          <Table.Row>
+          <Table.Row key={coin.coin}>
             <Table.Cell>
               <Link href={`/monedas/${encodeURIComponent(coin.coin)}`}>{coin.coin}</Link>
             </Table.Cell>

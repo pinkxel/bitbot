@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { Card, Button, Label, RangeSlider, TextInput, Modal } from 'flowbite-react'
 
 export default function Page({ params }: { params: { operar: string } }) {
-  const [session, setSession] = useState({})
+  const [session, setSession] = useState({apiKey:'', secretKey:''})
   const [balanceOf, setBalanceOf] = useState('--')
   const [available, setAvailable] = useState('--')
   const [amount, setAmount] = useState(0)
@@ -13,12 +13,12 @@ export default function Page({ params }: { params: { operar: string } }) {
   const props = { openModal, setOpenModal }
 
   async function fetchData() {
-    const apiKey = localStorage.getItem('apiKey')
-    const secretKey = localStorage.getItem('secretKey')
+    const apiKey = localStorage.getItem('apiKey') as string
+    const secretKey = localStorage.getItem('secretKey') as string
     setSession({ apiKey, secretKey });
     const id = params.operar[1]
 
-    async function fetchBalanceOf(apiKey, secretKey) {
+    async function fetchBalanceOf(apiKey : string, secretKey : string) {
       try {
         const response = await fetch('/api/balanceOf', {
           method: 'POST',
@@ -33,7 +33,7 @@ export default function Page({ params }: { params: { operar: string } }) {
         console.error(error);
       }
     }
-    async function fetchAvailable(apiKey, secretKey) {      
+    async function fetchAvailable(apiKey : string, secretKey : string) {      
       try {
         const response = await fetch('/api/available', {
           method: 'POST',
@@ -49,7 +49,7 @@ export default function Page({ params }: { params: { operar: string } }) {
         console.error(error);
       }
     }
-    async function fetchCoin(apiKey, secretKey) {
+    async function fetchCoin(apiKey : string, secretKey : string) {
       try { 
         const response = await fetch('/api/coin', {
           method: 'POST',
@@ -75,7 +75,7 @@ export default function Page({ params }: { params: { operar: string } }) {
   }, [])
   
   // Función auxiliar para llamar a la API según el valor de params.operar[0]
-  async function handleOperation(apiKey, secretKey, coin, amount) {
+  async function handleOperation(apiKey : string, secretKey : string, coin : string, amount : number) {
     try {
       // Determinar la ruta de la API según el valor de params.operar[0]
       let apiRoute;
@@ -145,7 +145,8 @@ export default function Page({ params }: { params: { operar: string } }) {
             </h3>
             <div className="flex justify-center gap-4">
               <Button onClick={() => {
-                handleOperation(session.apiKey, session.secretKey, params.operar[1], (amount / parseFloat(coin)).toFixed(4))
+                console.log('coin', coin, 'amount', amount)
+                handleOperation(session.apiKey, session.secretKey, params.operar[1], parseFloat((amount / parseFloat(coin)).toFixed(4)))
                 fetchData()
                 props.setOpenModal(undefined)
               }}>

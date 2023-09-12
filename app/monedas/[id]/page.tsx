@@ -14,13 +14,13 @@ export default function Page({ params }: { params: { id: string } }) {
 
   useEffect(() => {
     console.log('params', params)
-    const apiKey = localStorage.getItem('apiKey')
-    const secretKey = localStorage.getItem('secretKey')
+    const apiKey = localStorage.getItem('apiKey') as string
+    const secretKey = localStorage.getItem('secretKey') as string
     const { id } = params
 
     setSession({ apiKey, secretKey });
 
-    async function fetchCoin(apiKey, secretKey) {
+    async function fetchCoin(apiKey : string, secretKey : string) {
       try {
         const response = await fetch('/api/coin', {
           method: 'POST',
@@ -36,7 +36,7 @@ export default function Page({ params }: { params: { id: string } }) {
         console.error(error);
       }
     }
-    async function fetchBalanceOf(apiKey, secretKey) {
+    async function fetchBalanceOf(apiKey : string, secretKey : string) {
       try {
         const response = await fetch('/api/balanceOf', {
           method: 'POST',

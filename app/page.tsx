@@ -18,7 +18,7 @@ export default function Inicio() {
     const secretKey = localStorage.getItem('secretKey');
 
     setSession({ apiKey, secretKey });
-    async function fetchBalance(apiKey, secretKey) {
+    async function fetchBalance(apiKey : string, secretKey : string) {
       try {
         const response = await fetch('/api/balance', {
           method: 'POST',
@@ -34,7 +34,7 @@ export default function Inicio() {
         console.error(error);
       }
     }
-    async function fetchBalances(apiKey, secretKey) {
+    async function fetchBalances(apiKey : string, secretKey : string) {
       try {
         const response = await fetch('/api/balances', {
           method: 'POST',
