@@ -24,7 +24,7 @@ export default function RootLayout({
         <Flowbite theme={{ dark: true }}>
           <RouteGuard>
             <Navbar>
-              <Navbar.Collapse>
+              <Navbar>
                 <Navbar.Link href="/">
                   <Badge color="info">
                     BitBot
@@ -39,7 +39,7 @@ export default function RootLayout({
                 <Navbar.Link href="/cuenta">
                   Cuenta
                 </Navbar.Link>
-              </Navbar.Collapse>
+              </Navbar>
               <DarkThemeToggle />
             </Navbar>
             <div className='flex dark:bg-gray-900'>
