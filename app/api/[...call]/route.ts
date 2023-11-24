@@ -13,6 +13,7 @@ export async function POST(request: Request, { params }: { params: { call: strin
   //const session = req.session
   const coin = req.coin ?? ''
   const amount = req.amount ?? ''
+  const schedule = req.schedule ?? ''
   const client = Binance({ apiKey: session.apiKey, apiSecret: session.secretKey })
 
   const ip = request.headers.get('x-real-ip')
@@ -172,6 +173,48 @@ export async function POST(request: Request, { params }: { params: { call: strin
         price = 1
       }
       return price//, coinInfo};
+    },
+    scheduledSale: async () => {
+      console.log('session', session)
+      console.log('schedule', schedule)
+      const { earnAmount, loseAmount, resaleTime } = schedule
+      const coinPrice = await calls.coin()
+      const priceEarn = (coinPrice * ((earnAmount * 0.01) + 1)).toFixed(2).toString()
+      const priceLose = (coinPrice * (1 - (loseAmount * 0.01))).toFixed(2).toString()
+      const balance = await calls.balanceOf()
+      const amount = ((parseFloat(balance) / coinPrice) * .9).toFixed(4)
+
+      console.log('amount', amount)
+      console.log('priceEarn, priceLose', priceEarn, priceLose)
+
+      const info = await client.exchangeInfo();
+      const symbolInfo = info.symbols.find(s => s.symbol === 'BTCUSDT');
+      //console.log('symbolInfo filters:', symbolInfo.filters)
+
+      // Crear orden límite de ganancia
+      const earnAmountOrder = await client.order({
+        symbol: coin + 'USDT',
+        side: 'SELL',
+        quantity: amount,
+        price: priceEarn,
+        type: 'STOP_LIMIT'
+      })
+
+      // Crear orden límite de pérdida
+      const loseAmountOrder = await client.order({
+        symbol: coin + 'USDT',
+        side: 'SELL',
+        quantity: amount,
+        price: priceLose,
+        type: 'STOP_LIMIT'
+      })
+
+      console.log('order', resaleTime)
+
+      const scheduleOrders = { earnAmountOrder, loseAmountOrder }
+      console.log('order', scheduleOrders)
+
+      return scheduleOrders;
     }
   }
 

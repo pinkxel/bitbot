@@ -109,6 +109,15 @@ export default function Page({ params }: { params: { operar: string } }) {
       <p>$ {balanceOf}</p>
       <h2>¿Cuánto quieres {params.operar[0]}?  </h2>
       <Label htmlFor="range" value={`Disponibles $ ${params.operar[0] == 'comprar' ? available : balanceOf}`}/>
+      <RangeSlider id="range"
+        min={0}
+        max={params.operar[0] == 'comprar' ? available : balanceOf}
+        step={.01}
+        value={amount}
+        onChange={(event) => {
+          setAmount(parseFloat(event.target.value) || 0); // actualizar el estado local con el valor
+        }}
+      />
       <TextInput
         id="amount"
         placeholder="--"
@@ -122,15 +131,6 @@ export default function Page({ params }: { params: { operar: string } }) {
           setAmount(parseFloat(available) * percentage) // actualizar el estado local con el valor del input
         }}
         required />
-      <RangeSlider id="range"
-        min={0}
-        max={params.operar[0] == 'comprar' ? available : balanceOf}
-        step={.01}
-        value={amount}
-        onChange={(event) => {
-          setAmount(parseFloat(event.target.value) || 0); // actualizar el estado local con el valor
-        }}
-      />
       <p>Igual a { (amount / parseFloat(coin)).toFixed(4) } {params.operar[1]}</p>
       <div className="flex gap-2">
       <Button className="capitalize" onClick={() => props.setOpenModal('pop-up')}>
