@@ -35,6 +35,7 @@ export default function Page({ params }: { params: { operar: string } }) {
     }
     async function fetchAvailable(apiKey : string, secretKey : string) {      
       try {
+        console.log('test');
         const response = await fetch('/api/available', {
           method: 'POST',
           headers: {
@@ -46,6 +47,7 @@ export default function Page({ params }: { params: { operar: string } }) {
         console.log('data', data)
         setAvailable(data)
       } catch (error) {
+        console.log('testError');
         console.error(error);
       }
     }
@@ -73,10 +75,31 @@ export default function Page({ params }: { params: { operar: string } }) {
   useEffect(() => {
     fetchData()
   }, [])
+
+  async function fetchMinQty(apiKey : string, secretKey : string, symbol : string) {
+    try {
+      console.log('symbol!!!!!!!11', symbol);
+      const response = await fetch('/api/minQty', {
+        method: 'POST',
+        headers: {
+          'Content-type': 'application/json'
+        },
+        body: JSON.stringify({session: { apiKey, secretKey }, symbol: symbol})
+      });
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error(error);
+    }
+  }
   
   // Función auxiliar para llamar a la API según el valor de params.operar[0]
   async function handleOperation(apiKey : string, secretKey : string, coin : string, amount : number) {
     try {
+      console.log('coin', coin);
+      const minQty = await fetchMinQty(apiKey, secretKey, coin + 'USDT'); 
+      console.log('minQty', minQty);
+
       // Determinar la ruta de la API según el valor de params.operar[0]
       let apiRoute;
       if (params.operar[0] === "comprar") {
@@ -86,6 +109,7 @@ export default function Page({ params }: { params: { operar: string } }) {
       } else {
         throw new Error("Operación inválida");
       }
+
       // Llamar a la API con los datos necesarios
       const response = await fetch(apiRoute, {
         method: "POST",
@@ -97,6 +121,7 @@ export default function Page({ params }: { params: { operar: string } }) {
       // Obtener la respuesta de la API y mostrarla por consola
       const data = await response.json();
       console.log(data)
+      fetchData()
     } catch (error) {
       console.error(error);
     }
@@ -115,6 +140,7 @@ export default function Page({ params }: { params: { operar: string } }) {
         step={.01}
         value={amount}
         onChange={(event) => {
+          console.log('AMOUNT', amount);
           setAmount(parseFloat(event.target.value) || 0); // actualizar el estado local con el valor
         }}
       />
@@ -123,7 +149,7 @@ export default function Page({ params }: { params: { operar: string } }) {
         placeholder="--"
         value={amount}
         onChange={(event) => {
-          console.log(event.target.value)
+          console.log('VALUE', event.target.value)
           //const value = event.target.value == '' ? 0 : event.target.value
           const amount = parseFloat(event.target.value) || 0
           const percentage = amount / parseFloat(balanceOf)
@@ -146,8 +172,9 @@ export default function Page({ params }: { params: { operar: string } }) {
             <div className="flex justify-center gap-4">
               <Button onClick={() => {
                 console.log('coin', coin, 'amount', amount)
-                handleOperation(session.apiKey, session.secretKey, params.operar[1], parseFloat((amount / parseFloat(coin)).toFixed(4)))
-                fetchData()
+                const coinAmount = parseFloat((amount / parseFloat(coin)).toFixed(5));
+                console.log('coinAmount!', coinAmount);
+                handleOperation(session.apiKey, session.secretKey, params.operar[1], coinAmount)
                 props.setOpenModal(undefined)
               }}>
                 Si, estoy seguro

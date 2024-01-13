@@ -17,8 +17,8 @@ export default function Page({ params }: { params: { id: string } }) {
   const [earnAmountText, setEarnAmountText] = useState('')
   const [loseAmount, setLoseAmount] = useState(0)
   const [loseAmountText, setLoseAmountText] = useState('')
-  const [resaleTime, setResaleTime] = useState(0)
-  const [resaleTimeText, setResaleTimeText] = useState('')
+  const [reSaleTime, setreSaleTime] = useState(0)
+  const [reSaleTimeText, setreSaleTimeText] = useState('')
 
   const [openModal, setOpenModal] = useState<string | undefined>()
   const props = { openModal, setOpenModal }
@@ -76,12 +76,14 @@ export default function Page({ params }: { params: { id: string } }) {
     setIsAutoSaleEnabled(event.target.checked)
   };
 
-  const handleCreateScheduledSale = async (apiKey : string, secretKey : string, coin: string, schedule : object) => {
+  const handleCreateScheduledSale = async (apiKey : string, secretKey : string, coin: string, schedule : any) => {
       try {
+        const { earnAmount, loseAmount, reSaleTime } = schedule;
+
         // Define the API endpoint
         const apiEndpoint = "/api/scheduledSale";
 
-        console.log("coin ### ", coin)
+        console.log("coin ### ", coin);
     
         // Define the request body
         const requestBody = {
@@ -89,7 +91,8 @@ export default function Page({ params }: { params: { id: string } }) {
           coin,
           schedule
         };
-    
+
+        console.log('coin, schedule', coin, schedule);
         // Make the API request
         const response = await fetch(apiEndpoint, {
           method: "POST",
@@ -104,6 +107,8 @@ export default function Page({ params }: { params: { id: string } }) {
     
         // Log the response data
         console.log('Scheduled sale created', data);
+
+        fetchData()
       } catch (error) {
         console.error('Error creating scheduled sale', error);
       }
@@ -198,34 +203,34 @@ export default function Page({ params }: { params: { id: string } }) {
         required />
       <h2>Volver a comprar durante:</h2>
       <RangeSlider disabled={!isAutoSaleEnabled}
-        id="resaleTimeRange"
+        id="reSaleTimeRange"
         min={0}
         max={1000}//params.operar[0] == 'comprar' ? available : balanceOf}
         step={1}
-        value={resaleTime}
+        value={reSaleTime}
         onChange={(event) => {
-          const resaleTime = parseFloat(event.target.value) || 0
-          setResaleTime(resaleTime);
-          setResaleTimeText(resaleTime + ' segundos'); // actualizar el estado local con el valor
+          const reSaleTime = parseFloat(event.target.value) || 0
+          setreSaleTime(reSaleTime);
+          setreSaleTimeText(reSaleTime + ' segundos'); // actualizar el estado local con el valor
         }}
       />
       <TextInput disabled={!isAutoSaleEnabled}
-        id="resaleTimeTextInput"
+        id="reSaleTimeTextInput"
         placeholder="--"
-        value={resaleTimeText}
+        value={reSaleTimeText}
         required
         onChange={(event) => {
           console.log(event.target.value)
           const value = event.target.value == '' ? 0 : event.target.value
-          const resaleTime = parseFloat(event.target.value) || 0
+          const reSaleTime = parseFloat(event.target.value) || 0
           //const percentage = amount / parseFloat(balanceOf)
 
-          setResaleTime(resaleTime) // actualizar el estado local con el valor del input
-          setResaleTimeText(resaleTime)
+          setreSaleTime(reSaleTime) // actualizar el estado local con el valor del input
+          setreSaleTimeText(reSaleTime)
         }}
         onBlur={(event) => {
           const amount = parseFloat(event.target.value) || 0
-          setResaleTimeText(amount + ' segundos')
+          setreSaleTimeText(amount + ' segundos')
         }}
       />
       <div className="flex">
@@ -243,8 +248,7 @@ export default function Page({ params }: { params: { id: string } }) {
             </h3>
             <div className="flex justify-center gap-4">
               <Button onClick={() => {
-                handleCreateScheduledSale(session.apiKey, session.secretKey, params.id, { earnAmount, loseAmount, resaleTime })
-                fetchData()
+                handleCreateScheduledSale(session.apiKey, session.secretKey, params.id, { earnAmount, loseAmount, reSaleTime })
                 props.setOpenModal(undefined)
               }}>
                 Si, estoy seguro
