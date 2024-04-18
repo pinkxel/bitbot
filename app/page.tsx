@@ -15,33 +15,33 @@ export default function Inicio() {
   useEffect(() => {
     
     const apiKey = localStorage.getItem('apiKey');
-    const secretKey = localStorage.getItem('secretKey');
+    const apiSecret = localStorage.getItem('apiSecret');
 
-    setSession({ apiKey, secretKey });
-    async function fetchBalance(apiKey : string, secretKey : string) {
+    setSession({ apiKey, apiSecret });
+    async function fetchBalance(apiKey : string, apiSecret : string) {
       try {
         const response = await fetch('/api/balance', {
           method: 'POST',
           headers: {
             'Content-type': 'application/json'
           },
-          body: JSON.stringify({session: { apiKey, secretKey }})
+          body: JSON.stringify({session: { apiKey, apiSecret }})
         });
         const data = await response.json();
-        //console.log('Balance', data)
+        console.log('#Balance!&&&', data)
         setBalance(data.toFixed(2));
       } catch (error) {
         console.error(error);
       }
     }
-    async function fetchBalances(apiKey : string, secretKey : string) {
+    async function fetchBalances(apiKey : string, apiSecret : string) {
       try {
         const response = await fetch('/api/balances', {
           method: 'POST',
           headers: {
             'Content-type': 'application/json'
           },
-          body: JSON.stringify({session: { apiKey, secretKey }})
+          body: JSON.stringify({session: { apiKey, apiSecret }})
         });
         const data = await response.json();
         setBalances(data);
@@ -50,8 +50,8 @@ export default function Inicio() {
         console.error(error);
       }
     }
-    fetchBalance(apiKey, secretKey);
-    fetchBalances(apiKey, secretKey);
+    fetchBalance(apiKey, apiSecret);
+    fetchBalances(apiKey, apiSecret);
   }, []);
 
   return (

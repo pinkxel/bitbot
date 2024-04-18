@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { Card, Button, Label, RangeSlider, TextInput, Modal } from 'flowbite-react'
 
 export default function Page({ params }: { params: { operar: string } }) {
-  const [session, setSession] = useState({apiKey:'', secretKey:''})
+  const [session, setSession] = useState({apiKey:'', apiSecret:''})
   const [balanceOf, setBalanceOf] = useState('--')
   const [available, setAvailable] = useState('--')
   const [amount, setAmount] = useState(0)
@@ -14,18 +14,18 @@ export default function Page({ params }: { params: { operar: string } }) {
 
   async function fetchData() {
     const apiKey = localStorage.getItem('apiKey') as string
-    const secretKey = localStorage.getItem('secretKey') as string
-    setSession({ apiKey, secretKey });
+    const apiSecret = localStorage.getItem('apiSecret') as string
+    setSession({ apiKey, apiSecret });
     const id = params.operar[1]
 
-    async function fetchBalanceOf(apiKey : string, secretKey : string) {
+    async function fetchBalanceOf(apiKey : string, apiSecret : string) {
       try {
         const response = await fetch('/api/balanceOf', {
           method: 'POST',
           headers: {
             'Content-type': 'application/json'
           },
-          body: JSON.stringify({session: { apiKey, secretKey }, coin: id})
+          body: JSON.stringify({session: { apiKey, apiSecret }, coin: id})
         });
         const data = await response.json()
         setBalanceOf(data);
@@ -33,7 +33,7 @@ export default function Page({ params }: { params: { operar: string } }) {
         console.error(error);
       }
     }
-    async function fetchAvailable(apiKey : string, secretKey : string) {      
+    async function fetchAvailable(apiKey : string, apiSecret : string) {      
       try {
         console.log('test');
         const response = await fetch('/api/available', {
@@ -41,7 +41,7 @@ export default function Page({ params }: { params: { operar: string } }) {
           headers: {
             'Content-type': 'application/json'
           },
-          body: JSON.stringify({session: { apiKey, secretKey }, coin: params.operar[0] == 'comprar' ? 'USDT' : id })
+          body: JSON.stringify({session: { apiKey, apiSecret }, coin: params.operar[0] == 'comprar' ? 'USDT' : id })
         });
         const data = await response.json()
         console.log('data', data)
@@ -51,14 +51,14 @@ export default function Page({ params }: { params: { operar: string } }) {
         console.error(error);
       }
     }
-    async function fetchCoin(apiKey : string, secretKey : string) {
+    async function fetchCoin(apiKey : string, apiSecret : string) {
       try { 
         const response = await fetch('/api/coin', {
           method: 'POST',
           headers: {
             'Content-type': 'application/json'
           },
-          body: JSON.stringify({session: { apiKey, secretKey }, coin: id})
+          body: JSON.stringify({session: { apiKey, apiSecret }, coin: id})
         });
         const data = await response.json();
         setCoin(data);
@@ -67,16 +67,16 @@ export default function Page({ params }: { params: { operar: string } }) {
         console.error(error);
       }
     }
-    fetchCoin(apiKey, secretKey)
-    fetchBalanceOf(apiKey, secretKey)
-    fetchAvailable(apiKey, secretKey)
+    fetchCoin(apiKey, apiSecret)
+    fetchBalanceOf(apiKey, apiSecret)
+    fetchAvailable(apiKey, apiSecret)
   }
 
   useEffect(() => {
     fetchData()
   }, [])
 
-  async function fetchMinQty(apiKey : string, secretKey : string, symbol : string) {
+  async function fetchMinQty(apiKey : string, apiSecret : string, symbol : string) {
     try {
       console.log('symbol!!!!!!!11', symbol);
       const response = await fetch('/api/minQty', {
@@ -84,7 +84,7 @@ export default function Page({ params }: { params: { operar: string } }) {
         headers: {
           'Content-type': 'application/json'
         },
-        body: JSON.stringify({session: { apiKey, secretKey }, symbol: symbol})
+        body: JSON.stringify({session: { apiKey, apiSecret }, symbol: symbol})
       });
       const data = await response.json();
       return data;
@@ -94,10 +94,10 @@ export default function Page({ params }: { params: { operar: string } }) {
   }
   
   // Función auxiliar para llamar a la API según el valor de params.operar[0]
-  async function handleOperation(apiKey : string, secretKey : string, coin : string, amount : number) {
+  async function handleOperation(apiKey : string, apiSecret : string, coin : string, amount : number) {
     try {
       console.log('coin', coin);
-      const minQty = await fetchMinQty(apiKey, secretKey, coin + 'USDT'); 
+      const minQty = await fetchMinQty(apiKey, apiSecret, coin + 'USDT'); 
       console.log('minQty', minQty);
 
       // Determinar la ruta de la API según el valor de params.operar[0]
@@ -116,7 +116,7 @@ export default function Page({ params }: { params: { operar: string } }) {
         headers: {
           "Content-type": "application/json"
         },
-        body: JSON.stringify({session: { apiKey, secretKey }, coin, amount})
+        body: JSON.stringify({session: { apiKey, apiSecret }, coin, amount})
       });
       // Obtener la respuesta de la API y mostrarla por consola
       const data = await response.json();
@@ -174,7 +174,7 @@ export default function Page({ params }: { params: { operar: string } }) {
                 console.log('coin', coin, 'amount', amount)
                 const coinAmount = parseFloat((amount / parseFloat(coin)).toFixed(5));
                 console.log('coinAmount!', coinAmount);
-                handleOperation(session.apiKey, session.secretKey, params.operar[1], coinAmount)
+                handleOperation(session.apiKey, session.apiSecret, params.operar[1], coinAmount)
                 props.setOpenModal(undefined)
               }}>
                 Si, estoy seguro

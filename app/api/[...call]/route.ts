@@ -1,16 +1,23 @@
-import axios from 'axios'
+// api/[...call]/route.ts
+import axios from 'axios';
 import { NextResponse } from 'next/server'
 
 export async function POST(request: Request, { params }: { params: { call: string } }) {
-  const req = await request.json()
+  const req = await request.json();
   const { call } = params;
   // Obtener la sesión del usuario
   const session = { apiKey: process.env.KEY, apiSecret: process.env.SECRET }
 
-  const coin = req.coin ?? ''
-  const amount = req.amount ?? ''
-  const symbol = req.symbol ?? ''
-  const schedule = req.schedule ?? ''
+  const { 
+    coin,
+    amount,
+    symbol,
+    schedule,
+    username,
+    password,
+    apiKey,
+    apiSecret
+  } = req;
 
   const client = axios.create({ baseURL:'/', headers: { 'X-API-KEY': session.apiKey, 'X-API-SECRET': session.apiSecret } })
 
@@ -18,7 +25,33 @@ export async function POST(request: Request, { params }: { params: { call: strin
   console.log(`La dirección IP de la solicitud es ${ip}`)
 
   const calls = {
-    
+    // Inicio de sesión
+    login: async () => {
+      const response = await axios.post('/login', { username, password });
+      if (response.status === 200) {
+        return { status: 200, message: 'Inicio de sesión exitoso', userId: response.data.userId };
+      } else {
+        return { status: 400, message: 'Nombre de usuario o contraseña incorrectos' };
+      }
+    },
+
+    // Cierre de sesión
+    logout: async () => {
+      console.log('hasta acá');
+      await axios.post('/logout');
+      return { status: 200, message: 'Sesión cerrada con éxito' };
+    },
+
+    // Registro
+    register: async () => {
+      console.log( username, password, apiKey, apiSecret );
+      const response = await axios.post('/register', { username, password, apiKey, apiSecret });
+      if (response.status === 200) {
+        return { status: 200, message: 'Usuario registrado con éxito', userId: response.data.userId };
+      } else {
+        return { status: 400, message: 'Error al registrar el usuario' };
+      }
+    },
     balance: async () => {
       // Obtener el balance del usuario
       const balance = await client.post('/balance', {session})
@@ -71,7 +104,8 @@ export async function POST(request: Request, { params }: { params: { call: strin
   }
 
   const reqCall = calls[call];
-  const res = req.amount != '' ? await reqCall(req.coin, req.amount) : await reqCall();
+  //const res = req.amount != '' ? await reqCall(req.coin, req.amount) : await reqCall();
+  const res = await reqCall();
   
   return NextResponse.json(res, { status: 200 })
 }

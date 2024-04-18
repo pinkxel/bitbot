@@ -26,45 +26,45 @@ export default function Page({ params }: { params: { id: string } }) {
   async function fetchData() {
     console.log('params', params)
     const apiKey = localStorage.getItem('apiKey') as string
-    const secretKey = localStorage.getItem('secretKey') as string
+    const apiSecret = localStorage.getItem('apiSecret') as string
     const { id } = params
 
-    setSession({ apiKey, secretKey });
+    setSession({ apiKey, apiSecret });
 
-    async function fetchCoin(apiKey : string, secretKey : string) {
+    async function fetchCoin(apiKey : string, apiSecret : string) {
       try {
         const response = await fetch('/api/coin', {
           method: 'POST',
           headers: {
             'Content-type': 'application/json'
           },
-          body: JSON.stringify({session: { apiKey, secretKey }, coin: id})
+          body: JSON.stringify({session: { apiKey, apiSecret }, coin: id})
         });
         const data = await response.json();
+        console.log('Balances', data)
         setCoin(data);
-        //console.log('Balances', data)
       } catch (error) {
         console.error(error);
       }
     }
-    async function fetchBalanceOf(apiKey : string, secretKey : string) {
+    async function fetchBalanceOf(apiKey : string, apiSecret : string) {
       try {
         const response = await fetch('/api/balanceOf', {
           method: 'POST',
           headers: {
             'Content-type': 'application/json'
           },
-          body: JSON.stringify({session: { apiKey, secretKey }, coin: id})
+          body: JSON.stringify({session: { apiKey, apiSecret }, coin: id})
         });
         const data = await response.json();
+        console.log('BalanceOf', data);
         setBalanceOf(data);
-        //console.log('Balances', data)
       } catch (error) {
         console.error(error);
       }
     }
-    fetchBalanceOf(apiKey, secretKey);
-    fetchCoin(apiKey, secretKey);
+    fetchBalanceOf(apiKey, apiSecret);
+    fetchCoin(apiKey, apiSecret);
   }
 
   useEffect(() => {
@@ -76,7 +76,7 @@ export default function Page({ params }: { params: { id: string } }) {
     setIsAutoSaleEnabled(event.target.checked)
   };
 
-  const handleCreateScheduledSale = async (apiKey : string, secretKey : string, coin: string, schedule : any) => {
+  const handleCreateScheduledSale = async (apiKey : string, apiSecret : string, coin: string, schedule : any) => {
       try {
         const { earnAmount, loseAmount, reSaleTime } = schedule;
 
@@ -87,7 +87,7 @@ export default function Page({ params }: { params: { id: string } }) {
     
         // Define the request body
         const requestBody = {
-          session: { apiKey, secretKey },
+          session: { apiKey, apiSecret },
           coin,
           schedule
         };
@@ -143,8 +143,8 @@ export default function Page({ params }: { params: { id: string } }) {
       <RangeSlider disabled={!isAutoSaleEnabled}
         id="earnAmountRange"
         min={0}
-        max={100}//params.operar[0] == 'comprar' ? available : balanceOf}
-        step={1}
+        max={10}//params.operar[0] == 'comprar' ? available : balanceOf}
+        step={.01}
         value={earnAmount}
         onChange={(event) => {
           const amout = parseFloat(event.target.value) || 0
@@ -175,7 +175,7 @@ export default function Page({ params }: { params: { id: string } }) {
         id="loseAmountRange"
         min={0}
         max={100}//params.operar[0] == 'comprar' ? available : balanceOf}
-        step={1}
+        step={.1}
         value={loseAmount}
         onChange={(event) => {
           const loseAmount = parseFloat(event.target.value) || 0 
@@ -248,7 +248,7 @@ export default function Page({ params }: { params: { id: string } }) {
             </h3>
             <div className="flex justify-center gap-4">
               <Button onClick={() => {
-                handleCreateScheduledSale(session.apiKey, session.secretKey, params.id, { earnAmount, loseAmount, reSaleTime })
+                handleCreateScheduledSale(session.apiKey, session.apiSecret, params.id, { earnAmount, loseAmount, reSaleTime })
                 props.setOpenModal(undefined)
               }}>
                 Si, estoy seguro

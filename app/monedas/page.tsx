@@ -10,16 +10,16 @@ export default function Monedas() {
 
   useEffect(() => {
     const apiKey = localStorage.getItem('apiKey')
-    const secretKey = localStorage.getItem('secretKey')
+    const apiSecret = localStorage.getItem('apiSecret')
 
-    async function fetchCoins(apiKey : string, secretKey : string) {
+    async function fetchCoins(apiKey : string, apiSecret : string) {
       try {
         const response = await fetch('/api/coins', {
           method: 'POST',
           headers: {
             'Content-type': 'application/json'
           },
-          body: JSON.stringify({session: { apiKey, secretKey }})
+          body: JSON.stringify({session: { apiKey, apiSecret }})
         });
         const data = await response.json();
         setCoins(data);
@@ -28,7 +28,7 @@ export default function Monedas() {
         console.error(error);
       }
     }
-    fetchCoins(apiKey,secretKey)
+    fetchCoins(apiKey,apiSecret)
   }, [])
 
   return (
