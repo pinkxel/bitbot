@@ -35,6 +35,10 @@ export default function Login() {
     try {
       const response = await axios.post('/api/login', { username, password, apiKey, apiSecret });
       if (response.status === 200) {
+        console.log('handleLogin response.data');
+        console.log(response.data);
+        localStorage.setItem('userId', response.data.userData.userId);
+        localStorage.setItem('userOrder', response.data.userData.userOrder);
         localStorage.setItem('apiKey', apiKey);
         localStorage.setItem('apiSecret', apiSecret);
         router.push('/');
@@ -52,6 +56,10 @@ export default function Login() {
     try {
       const response = await axios.post('/api/register', { username, password, apiKey, apiSecret });
       if (response.status === 200) {
+        console.log('handleRegister response.data');
+        console.log(response.data);
+        localStorage.setItem('userId', response.data.userData.userId);
+        localStorage.setItem('userOrder', response.data.userData.userOrder);
         localStorage.setItem('apiKey', apiKey);
         localStorage.setItem('apiSecret', apiSecret);
         router.push('/');

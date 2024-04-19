@@ -29,7 +29,10 @@ export async function POST(request: Request, { params }: { params: { call: strin
     login: async () => {
       const response = await axios.post('/login', { username, password });
       if (response.status === 200) {
-        return { status: 200, message: 'Inicio de sesión exitoso', userId: response.data.userId };
+        console.log('API login data');
+        const data = JSON.parse(response.data);
+        console.log(data);
+        return { status: 200, message: 'Inicio de sesión exitoso', userData: {userId: data.userId, userOrder: data.userOrder} };
       } else {
         return { status: 400, message: 'Nombre de usuario o contraseña incorrectos' };
       }
@@ -45,13 +48,17 @@ export async function POST(request: Request, { params }: { params: { call: strin
     // Registro
     register: async () => {
       console.log( username, password, apiKey, apiSecret );
-      const response = await axios.post('/register', { username, password, apiKey, apiSecret });
+      const response = await axios.post('/register', { username, password, apiKey, apiSecret , withCredentials: true });
       if (response.status === 200) {
-        return { status: 200, message: 'Usuario registrado con éxito', userId: response.data.userId };
+        const data = response.data;
+        console.log('API register data');
+        console.log(data);
+        return { status: 200, message: 'Usuario registrado con éxito', userData: {userId: data.userId, userOrder: data.userOrder} };
       } else {
         return { status: 400, message: 'Error al registrar el usuario' };
       }
     },
+
     balance: async () => {
       // Obtener el balance del usuario
       const balance = await client.post('/balance', {session})

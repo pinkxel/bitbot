@@ -16,7 +16,7 @@ export default function Cuenta() {
       if (response.status === 200) {
         localStorage.removeItem('apiKey');
         localStorage.removeItem('apiSecret');
-        //window.location.reload()
+        window.location.reload()
       } else {
         // Manejar errores de cierre de sesión aquí
       }

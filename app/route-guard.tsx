@@ -1,26 +1,27 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Cookies from 'js-cookie';
 
 function RouteGuard({ children }) {
   const router = useRouter();
 
   useEffect(() => {
-    // Comprueba si apiKey está en el almacenamiento local en cada cambio de ruta
-    const checkApiKey = () => {
-      const apiKey = window.localStorage.getItem('apiKey');
+    // Comprueba si la cookie de la sesión existe en cada cambio de ruta
+    const checkSessionCookie = () => {
+      const sessionCookie = Cookies.get('connect.sid');
 
-      if (!apiKey) {
+      if (!sessionCookie) {
         router.push('/login');
       }
     };
 
-    // Comprueba apiKey en la carga inicial
-    checkApiKey();
+    // Comprueba la cookie de la sesión en la carga inicial
+    checkSessionCookie();
 
     // Anula la suscripción a los eventos en useEffect return function
     return () => {
       // No hay un método 'off' para los eventos del router en Next.js 13
-      // router.events.off('routeChangeStart', checkApiKey);
+      // router.events.off('routeChangeStart', checkSessionCookie);
     };
   }, []);
 

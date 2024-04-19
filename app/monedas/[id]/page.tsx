@@ -23,6 +23,8 @@ export default function Page({ params }: { params: { id: string } }) {
   const [openModal, setOpenModal] = useState<string | undefined>()
   const props = { openModal, setOpenModal }
 
+  const userId = localStorage.getItem('userId');
+
   async function fetchData() {
     console.log('params', params)
     const apiKey = localStorage.getItem('apiKey') as string
@@ -68,7 +70,12 @@ export default function Page({ params }: { params: { id: string } }) {
   }
 
   useEffect(() => {
-    fetchData()
+    setIsAutoSaleEnabled(JSON.parse(localStorage.getItem('isAutoSaleEnabled') || 'false'));
+    setEarnAmount(JSON.parse(localStorage.getItem('earnAmount') || '0'));
+    setLoseAmount(JSON.parse(localStorage.getItem('loseAmount') || '0'));
+    setreSaleTime(JSON.parse(localStorage.getItem('reSaleTime') || '0'));
+
+    fetchData();
   }, [])
 
   const handleAutoSaleChange = (event) => {
@@ -89,7 +96,8 @@ export default function Page({ params }: { params: { id: string } }) {
         const requestBody = {
           session: { apiKey, apiSecret },
           coin,
-          schedule
+          schedule,
+          userId
         };
 
         console.log('coin, schedule', coin, schedule);
@@ -107,6 +115,11 @@ export default function Page({ params }: { params: { id: string } }) {
     
         // Log the response data
         console.log('Scheduled sale created', data);
+        
+        localStorage.setItem('isAutoSaleEnabled', JSON.stringify(isAutoSaleEnabled));
+        localStorage.setItem('earnAmount', JSON.stringify(earnAmount));
+        localStorage.setItem('loseAmount', JSON.stringify(loseAmount));
+        localStorage.setItem('reSaleTime', JSON.stringify(reSaleTime));
 
         fetchData()
       } catch (error) {
