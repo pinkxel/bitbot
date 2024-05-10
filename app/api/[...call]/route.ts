@@ -2,7 +2,13 @@
 import axios from 'axios';
 import { NextResponse } from 'next/server'
 
-export async function POST(request: Request, { params }: { params: { call: string } }) {
+const api = axios.create({
+  // Configura Axios para enviar cookies con cada solicitud
+  withCredentials: true,
+  baseURL: 'http://localhost'
+});
+
+export async function POST(request: Request, { params }: { params: { call: string }}) {
   const req = await request.json();
   const { call } = params;
   // Obtener la sesión del usuario
@@ -27,14 +33,28 @@ export async function POST(request: Request, { params }: { params: { call: strin
   const calls = {
     // Inicio de sesión
     login: async () => {
-      const response = await axios.post('/login', { username, password });
-      if (response.status === 200) {
-        console.log('API login data');
-        const data = JSON.parse(response.data);
-        console.log(data);
-        return { status: 200, message: 'Inicio de sesión exitoso', userData: {userId: data.userId, userOrder: data.userOrder} };
-      } else {
-        return { status: 400, message: 'Nombre de usuario o contraseña incorrectos' };
+      try {
+        const loginResponse = await api.post('/login', { username, password });
+        if (loginResponse.status === 200) {
+          console.log('API login data');
+          // Asumiendo que la respuesta es JSON y no necesita ser parseada
+          console.log(loginResponse.data);
+          return {
+            status: 200,
+            message: 'Inicio de sesión exitoso',
+            userData: {
+              userId: loginResponse.data.userId,
+              userOrder: loginResponse.data.userOrder
+            }
+          };
+        }
+      } catch (error) {
+        // Manejo de errores en caso de que la respuesta no sea 200
+        console.error(error.response ? error.response.data : error.message);
+        return {
+          status: error.response ? error.response.status : 500,
+          message: 'Error al iniciar sesión'
+        };
       }
     },
 
@@ -46,14 +66,30 @@ export async function POST(request: Request, { params }: { params: { call: strin
     },
 
     // Registro
-    register: async () => {
+    register: async (res: any) => {
       console.log( username, password, apiKey, apiSecret );
-      const response = await axios.post('/register', { username, password, apiKey, apiSecret , withCredentials: true });
+      const response = await api.post('/register', { username, password, apiKey, apiSecret });
       if (response.status === 200) {
         const data = response.data;
         console.log('API register data');
         console.log(data);
-        return { status: 200, message: 'Usuario registrado con éxito', userData: {userId: data.userId, userOrder: data.userOrder} };
+
+        // Mostrar las cookies en la consola
+        const sessionCookie = response.headers['set-cookie'];
+        console.log('Cookies devueltas por el servidor:', sessionCookie);
+
+        // Establecer la cookie en la cabecera de respuesta para el cliente
+        //res.setHeader('Set-Cookie', sessionCookie);
+
+        return {
+          sessionCookie: sessionCookie,
+          message: 'Inicio de sesión exitoso',
+          userData: {
+            userId: response.data.userId,
+            userOrder: response.data.userOrder,
+            //authToken: response.data.authToken,
+          }
+        };
       } else {
         return { status: 400, message: 'Error al registrar el usuario' };
       }
@@ -96,8 +132,8 @@ export async function POST(request: Request, { params }: { params: { call: strin
     },
     coin: async () => {
       // Vender una moneda
-      const res = await client.post('/coin', { coin })
-      return await res.data;
+      const resCoin = await client.post('/coin', { coin })
+      return await resCoin.data;
     },
     scheduledSale: async () => {
       // Programar una venta
@@ -112,7 +148,18 @@ export async function POST(request: Request, { params }: { params: { call: strin
 
   const reqCall = calls[call];
   //const res = req.amount != '' ? await reqCall(req.coin, req.amount) : await reqCall();
-  const res = await reqCall();
+  const resCall = await reqCall();
+
+  console.log("/////////////////// resCall");
+  console.log(resCall);
+
+  //const resCall = call === 'register' ? await reqCall(res) : await reqCall();
   
-  return NextResponse.json(res, { status: 200 })
+  return NextResponse.json(resCall, { 
+    status: 200,
+    headers: {
+      'Content-Type': 'application/json', // Tipo de contenido
+      'Set-Cookie': resCall.sessionCookie, // Establecer la cookie
+      // Otras cabeceras personalizadas si es necesario
+    }, });
 }

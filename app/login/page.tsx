@@ -1,3 +1,4 @@
+// api/login/page.tsx
 'use client'
 
 import { useState } from 'react';
@@ -6,6 +7,13 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 
 export default function Login() {
+  // Crea una instancia de Axios con la configuración de credenciales
+  const axiosInstance = axios.create({
+    withCredentials: true,
+    // Asegúrate de que la URL base sea correcta y permita credenciales
+    baseURL: 'http://localhost:3000'
+  });
+
   const router = useRouter();
 
   const [username, setUsername] = useState('');
@@ -33,7 +41,7 @@ export default function Login() {
   const handleLogin = async (event) => {
     event.preventDefault();
     try {
-      const response = await axios.post('/api/login', { username, password, apiKey, apiSecret });
+      const response = await axiosInstance.post('/api/login', { username, password, apiKey, apiSecret });
       if (response.status === 200) {
         console.log('handleLogin response.data');
         console.log(response.data);
@@ -54,12 +62,13 @@ export default function Login() {
   const handleRegister = async (event) => {
     event.preventDefault();
     try {
-      const response = await axios.post('/api/register', { username, password, apiKey, apiSecret });
+      const response = await axiosInstance.post('/api/register', { username, password, apiKey, apiSecret });
       if (response.status === 200) {
         console.log('handleRegister response.data');
         console.log(response.data);
         localStorage.setItem('userId', response.data.userData.userId);
         localStorage.setItem('userOrder', response.data.userData.userOrder);
+        //localStorage.setItem('authToken', response.data.userData.authToken);
         localStorage.setItem('apiKey', apiKey);
         localStorage.setItem('apiSecret', apiSecret);
         router.push('/');
