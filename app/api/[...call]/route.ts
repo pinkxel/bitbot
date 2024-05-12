@@ -67,31 +67,38 @@ export async function POST(request: Request, { params }: { params: { call: strin
 
     // Registro
     register: async (res: any) => {
-      console.log( username, password, apiKey, apiSecret );
-      const response = await api.post('/register', { username, password, apiKey, apiSecret });
-      if (response.status === 200) {
-        const data = response.data;
-        console.log('API register data');
-        console.log(data);
+      try {
+        console.log( username, password, apiKey, apiSecret );
+        const response = await api.post('/register', { username, password, apiKey, apiSecret });
+        if (response.status === 200) {
+          const data = response.data;
+          console.log('API register data');
+          console.log(data);
 
-        // Mostrar las cookies en la consola
-        const sessionCookie = response.headers['set-cookie'];
-        console.log('Cookies devueltas por el servidor:', sessionCookie);
+          // Mostrar las cookies en la consola
+          const sessionCookie = response.headers['set-cookie'];
+          console.log('Cookies devueltas por el servidor:', sessionCookie);
 
-        // Establecer la cookie en la cabecera de respuesta para el cliente
-        //res.setHeader('Set-Cookie', sessionCookie);
+          // Establecer la cookie en la cabecera de respuesta para el cliente
+          //res.setHeader('Set-Cookie', sessionCookie);
 
-        return {
-          sessionCookie: sessionCookie,
-          message: 'Inicio de sesión exitoso',
-          userData: {
-            userId: response.data.userId,
-            userOrder: response.data.userOrder,
-            //authToken: response.data.authToken,
-          }
-        };
-      } else {
-        return { status: 400, message: 'Error al registrar el usuario' };
+          return {
+            sessionCookie: sessionCookie,
+            message: 'Inicio de sesión exitoso',
+            userData: {
+              userId: response.data.userId,
+              userOrder: response.data.userOrder,
+              //authToken: response.data.authToken,
+            }
+          };
+        } else {
+          return { status: 400, message: 'Error al registrar el usuario' };
+        }
+      } catch (error) {
+        console.error('Error al registrar:', error.message);
+        // Aquí puedes manejar el error de la manera que prefieras
+        // (por ejemplo, mostrar un mensaje al usuario o intentar de nuevo).
+        throw error; // Opcional: relanzar la excepción para que otros manejadores la capturen
       }
     },
 
@@ -116,10 +123,24 @@ export async function POST(request: Request, { params }: { params: { call: strin
       return await balance.data;
     },
     buy: async () => {
-      // Comprar una moneda
-      const buy = await client.post('/buy', { session, coin, amount })
-      return await buy.data;
-    },
+      try {
+        // Comprar una moneda
+        const buy = await client.post('/buy', { session, coin, amount });
+        console.log(buy);
+        return await buy.data;
+      } catch (error) {
+        console.error('Error al comprar: NEW', );
+        // Personaliza la respuesta de error según tus necesidades
+        console.log(error.response.status);
+        if (error.response.status === 422) {
+          // Por ejemplo, si el recurso no se encuentra, puedes enviar un 404 al cliente
+          return { error: error.response.data.error };
+        } else {
+          // Otras opciones de manejo de errores
+          return { error: error };
+        }
+      }
+    },    
     sell: async () => {
       // Vender una moneda
       const sell = await client.post('/sell', { session, coin, amount })
@@ -151,15 +172,20 @@ export async function POST(request: Request, { params }: { params: { call: strin
   const resCall = await reqCall();
 
   console.log("/////////////////// resCall");
-  console.log(resCall);
+  console.log(resCall, call);
 
   //const resCall = call === 'register' ? await reqCall(res) : await reqCall();
   
-  return NextResponse.json(resCall, { 
+  let res: { status: number; headers: { 'Content-Type': string; 'Set-Cookie'?: string } } = { 
     status: 200,
     headers: {
       'Content-Type': 'application/json', // Tipo de contenido
-      'Set-Cookie': resCall.sessionCookie, // Establecer la cookie
-      // Otras cabeceras personalizadas si es necesario
-    }, });
+    }, 
+  };
+  
+  if(resCall) {
+    res.headers['Set-Cookie'] = resCall.sessionCookie; // Establecer la cookie
+  }
+
+  return NextResponse.json(resCall, res);
 }
