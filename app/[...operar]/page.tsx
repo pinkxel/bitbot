@@ -10,7 +10,9 @@ export default function Page({ params }: { params: { operar: string } }) {
   const [amount, setAmount] = useState(0)
   const [coin, setCoin] = useState('--')
   const [openModal, setOpenModal] = useState<string | undefined>()
-  const props = { openModal, setOpenModal }
+  const [openErrorModal, setOpenErrorModal] = useState<string | undefined>()
+  const [openErrorModalMessage, setOpenErrorModalMessage] = useState<string | undefined>()
+  const props = { openModal, setOpenModal, openErrorModal, setOpenErrorModal, openErrorModalMessage, setOpenErrorModalMessage }
 
   async function fetchData() {
     const apiKey = localStorage.getItem('apiKey') as string
@@ -120,7 +122,13 @@ export default function Page({ params }: { params: { operar: string } }) {
       });
       // Obtener la respuesta de la API y mostrarla por consola
       const data = await response.json();
-      console.log(data)
+      if(data.error) {
+        console.log("data//////")
+        console.log(data)
+        props.setOpenErrorModalMessage(data.error + ' Pruebe con un valor mayor o igual a ' + data.minNotional);
+        props.setOpenErrorModal('pop-up-error');
+      }
+
       fetchData()
     } catch (error) {
       console.error(error);
@@ -149,12 +157,20 @@ export default function Page({ params }: { params: { operar: string } }) {
         placeholder="--"
         value={amount}
         onChange={(event) => {
-          console.log('VALUE', event.target.value)
-          //const value = event.target.value == '' ? 0 : event.target.value
-          const amount = parseFloat(event.target.value) || 0
-          const percentage = amount / parseFloat(balanceOf)
+          const value = event.target.value;
 
-          setAmount(parseFloat(available) * percentage) // actualizar el estado local con el valor del input
+          console.log('VALUE', value)
+          // Verificar si el último carácter es un punto
+          if (value[value.length - 1] === '.') {
+            setAmount(value); // Mantener el punto en el valor
+          } else {
+            //const value = event.target.value == '' ? 0 : event.target.value
+            //const amount = parseFloat(event.target.value) || 0
+            //const percentage = amount / parseFloat(balanceOf)
+            //setAmount(parseFloat(available) * percentage) // actualizar el estado local con el valor del input}
+            //setAmount(amount);
+            setAmount(parseFloat(value) || 0); // Parsear el valor numérico
+          }
         }}
         required />
       <p>Igual a { (amount / parseFloat(coin)).toFixed(4) } {params.operar[1]}</p>
@@ -181,6 +197,21 @@ export default function Page({ params }: { params: { operar: string } }) {
               </Button>
               <Button color="gray" onClick={() => props.setOpenModal(undefined)}>
                 No, cancelar
+              </Button>
+            </div>
+          </div>
+        </Modal.Body>
+      </Modal>
+      <Modal show={props.openErrorModal === 'pop-up-error'} size="md" popup onClose={() => props.setOpenErrorModal(undefined)}>
+        <Modal.Header />
+        <Modal.Body>
+          <div className="text-center">
+            <h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
+              {props.openErrorModalMessage}.
+            </h3>
+            <div className="flex justify-center gap-4">
+              <Button onClick={() => props.setOpenErrorModal(undefined)}>
+                Aceptar
               </Button>
             </div>
           </div>

@@ -134,7 +134,7 @@ export async function POST(request: Request, { params }: { params: { call: strin
         console.log(error.response.status);
         if (error.response.status === 422) {
           // Por ejemplo, si el recurso no se encuentra, puedes enviar un 404 al cliente
-          return { error: error.response.data.error };
+          return { error: error.response.data.error, minNotional: error.response.data.minNotional };
         } else {
           // Otras opciones de manejo de errores
           return { error: error };
@@ -142,9 +142,22 @@ export async function POST(request: Request, { params }: { params: { call: strin
       }
     },    
     sell: async () => {
-      // Vender una moneda
-      const sell = await client.post('/sell', { session, coin, amount })
-      return await sell.data;
+      try {
+        // Vender una moneda
+        const sell = await client.post('/sell', { session, coin, amount })
+        return await sell.data;
+      } catch (error) {
+        console.error('Error al comprar: NEW', );
+        // Personaliza la respuesta de error según tus necesidades
+        console.log(error.response.status);
+        if (error.response.status === 422) {
+          // Por ejemplo, si el recurso no se encuentra, puedes enviar un 404 al cliente
+          return { error: error.response.data.error, minNotional: error.response.data.minNotional };
+        } else {
+          // Otras opciones de manejo de errores
+          return { error: error };
+        }
+      }
     },
     coins: async () => {
       // Comprar una moneda

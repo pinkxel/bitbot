@@ -12,6 +12,7 @@ export default function Page({ params }: { params: { id: string } }) {
   const [balanceOf, setBalanceOf] = useState('--');
   const isUSDT = params.id === 'USDT' ? 'hidden' : '';
   const [isAutoSaleEnabled, setIsAutoSaleEnabled] = useState(false);
+  const [isAutoSaleRunning, setIsAutoSaleRunning] = useState(false);
 
   const [earnAmount, setEarnAmount] = useState(0)
   const [earnAmountText, setEarnAmountText] = useState('')
@@ -21,7 +22,8 @@ export default function Page({ params }: { params: { id: string } }) {
   const [reSaleTimeText, setreSaleTimeText] = useState('')
 
   const [openModal, setOpenModal] = useState<string | undefined>()
-  const props = { openModal, setOpenModal }
+  const [caseModal, setCaseModal] = useState<string | undefined>()
+  const props = { openModal, setOpenModal, caseModal, setCaseModal }
 
   const userId = localStorage.getItem('userId');
 
@@ -70,9 +72,14 @@ export default function Page({ params }: { params: { id: string } }) {
   }
 
   useEffect(() => {
+    if(localStorage.getItem('isAutoSaleEnabled')) {
+      setIsAutoSaleRunning(true);
+    }
     setIsAutoSaleEnabled(JSON.parse(localStorage.getItem('isAutoSaleEnabled') || 'false'));
     setEarnAmount(JSON.parse(localStorage.getItem('earnAmount') || '0'));
+    setEarnAmountText(JSON.parse(localStorage.getItem('earnAmount') || '0'));
     setLoseAmount(JSON.parse(localStorage.getItem('loseAmount') || '0'));
+    setLoseAmountText(JSON.parse(localStorage.getItem('loseAmount') || '0'));
     setreSaleTime(JSON.parse(localStorage.getItem('reSaleTime') || '0'));
 
     fetchData();
@@ -153,7 +160,7 @@ export default function Page({ params }: { params: { id: string } }) {
       </div>
  
       <h2>¿Vender con cuánto de ganancia?</h2>
-      <RangeSlider disabled={!isAutoSaleEnabled}
+      <RangeSlider disabled={!isAutoSaleEnabled || isAutoSaleRunning}
         id="earnAmountRange"
         min={0}
         max={10}//params.operar[0] == 'comprar' ? available : balanceOf}
@@ -165,14 +172,22 @@ export default function Page({ params }: { params: { id: string } }) {
           setEarnAmountText(amout + '% de ganancia');
         }}
       />
-      <TextInput disabled={!isAutoSaleEnabled}
+      <TextInput disabled={!isAutoSaleEnabled || isAutoSaleRunning}
         id="earnAmountTextInput"
         placeholder="--"
         value={earnAmountText}
         onChange={(event) => {
-          console.log(event.target.value)
+          const value = event.target.value;
+          let amount;
+          console.log(value)
           //const value = event.target.value == '' ? 0 : event.target.value
-          const amount = parseFloat(event.target.value) || 0
+
+          // Verificar si el último carácter es un punto
+          if (value[value.length - 1] === '.') {
+            amount = value; // Mantener el punto en el valor
+          } else {
+            amount = (parseFloat(value) || ''); // Parsear el valor numérico
+          }
           //const percentage = amount / parseFloat(balanceOf)
 
           setEarnAmount(amount) // actualizar el estado local con el valor del input
@@ -184,7 +199,7 @@ export default function Page({ params }: { params: { id: string } }) {
         }}
         required />
     <h2>¿Vender con cuánto de pérdida?</h2>
-      <RangeSlider disabled={!isAutoSaleEnabled}
+      <RangeSlider disabled={!isAutoSaleEnabled || isAutoSaleRunning}
         id="loseAmountRange"
         min={0}
         max={100}//params.operar[0] == 'comprar' ? available : balanceOf}
@@ -196,15 +211,28 @@ export default function Page({ params }: { params: { id: string } }) {
           setLoseAmountText(loseAmount + '% de pérdida')
         }}
       />
-      <TextInput disabled={!isAutoSaleEnabled}
+      <TextInput disabled={!isAutoSaleEnabled || isAutoSaleRunning}
         id="loseAmountTextInput"
         placeholder="--"
         value={loseAmountText}
         onChange={(event) => {
-          console.log(event.target.value)
-          const value = event.target.value == '' ? 0 : event.target.value
-          const amount = parseFloat(event.target.value) || 0
+          //console.log(event.target.value)
+          //const value = event.target.value == '' ? 0 : event.target.value
+          //const amount = parseFloat(event.target.value) || 0
+
           //const percentage = amount / parseFloat(balanceOf)
+
+          const value = event.target.value;
+          let amount;
+          console.log(value)
+          //const value = event.target.value == '' ? 0 : event.target.value
+
+          // Verificar si el último carácter es un punto
+          if (value[value.length - 1] === '.') {
+            amount = value; // Mantener el punto en el valor
+          } else {
+            amount = (parseFloat(value) || ''); // Parsear el valor numérico
+          }
 
           setLoseAmount(amount) // actualizar el estado local con el valor del input
           setLoseAmountText(amount)
@@ -215,7 +243,7 @@ export default function Page({ params }: { params: { id: string } }) {
         }}
         required />
       <h2>Volver a comprar durante:</h2>
-      <RangeSlider disabled={!isAutoSaleEnabled}
+      <RangeSlider disabled={!isAutoSaleEnabled || isAutoSaleRunning}
         id="reSaleTimeRange"
         min={0}
         max={1000}//params.operar[0] == 'comprar' ? available : balanceOf}
@@ -227,7 +255,7 @@ export default function Page({ params }: { params: { id: string } }) {
           setreSaleTimeText(reSaleTime + ' segundos'); // actualizar el estado local con el valor
         }}
       />
-      <TextInput disabled={!isAutoSaleEnabled}
+      <TextInput disabled={!isAutoSaleEnabled || isAutoSaleRunning}
         id="reSaleTimeTextInput"
         placeholder="--"
         value={reSaleTimeText}
@@ -246,23 +274,31 @@ export default function Page({ params }: { params: { id: string } }) {
           setreSaleTimeText(amount + ' segundos')
         }}
       />
-      <div className="flex">
-        <Button disabled={!isAutoSaleEnabled}  
-          onClick={() => props.setOpenModal('pop-up')}>
-          Crear venta programada
-        </Button>
-      </div>
+      {
+        !isAutoSaleRunning && (
+          <div className="flex">
+            <Button disabled={!isAutoSaleEnabled}  
+              onClick={() => { props.setOpenModal('pop-up'); props.setCaseModal('crear') }}>
+              Crear venta programada
+            </Button>
+          </div>
+        )
+      }
       <Modal show={props.openModal === 'pop-up'} size="md" popup onClose={() => props.setOpenModal(undefined)}>
         <Modal.Header />
         <Modal.Body>
           <div className="text-center">
             <h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
-              ¿Está seguro que desea crear la venta programada?
+              ¿Está seguro que desea {props.caseModal} la venta programada?
             </h3>
             <div className="flex justify-center gap-4">
               <Button onClick={() => {
-                handleCreateScheduledSale(session.apiKey, session.apiSecret, params.id, { earnAmount, loseAmount, reSaleTime })
-                props.setOpenModal(undefined)
+                if(props.caseModal == 'crear') {
+                  handleCreateScheduledSale(session.apiKey, session.apiSecret, params.id, { earnAmount, loseAmount, reSaleTime })
+                } else {
+                  /// TODO
+                }
+                props.setOpenModal(undefined);
               }}>
                 Si, estoy seguro
               </Button>
@@ -278,13 +314,13 @@ export default function Page({ params }: { params: { id: string } }) {
       </legend>
       <div className="flex">
         <legend className="mb-4 w-64">
-        Se venderá con un XX de ganancia o un 25% de pérdida.
+        Se venderá con un {earnAmount}% de ganancia o un {loseAmount}% de pérdida.
         Y se volverá a comprar y vender durante 1 hora.
         </legend>
       </div>
       <div className="flex">
         <Button color="gray" disabled={!isAutoSaleEnabled} 
-          onClick={() => props.setOpenModal(undefined)}>
+          onClick={() => {props.setOpenModal('pop-up'); props.setCaseModal('detener')}}>
           Cancelar
         </Button>
       </div>
