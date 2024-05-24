@@ -67,6 +67,7 @@ export default function Login() {
         console.log('handleRegister response.data');
         console.log(response.data);
         localStorage.setItem('userId', response.data.userData.userId);
+        console.log("response.data.userData.userOrder", response.data.userData.userOrder);
         localStorage.setItem('userOrder', response.data.userData.userOrder);
         //localStorage.setItem('authToken', response.data.userData.authToken);
         localStorage.setItem('apiKey', apiKey);

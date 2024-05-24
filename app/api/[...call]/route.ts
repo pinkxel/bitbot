@@ -18,6 +18,8 @@ export async function POST(request: Request, { params }: { params: { call: strin
     coin,
     amount,
     symbol,
+    userId,
+    orderListId,
     schedule,
     username,
     password,
@@ -170,9 +172,15 @@ export async function POST(request: Request, { params }: { params: { call: strin
       return await resCoin.data;
     },
     scheduledSale: async () => {
-      // Programar una venta
-      const scheduleSell = await client.post('/scheduledSale', { session, coin, schedule })
-      return await scheduleSell.data;
+      // Programar una venta programada
+      const scheduleSale = await client.post('/scheduledSale', { session, coin, schedule, userId })
+      return await scheduleSale.data;
+    },
+    cancelScheduledSale: async () => {
+      // Cancelar una venta programada
+      console.log("orderListId", orderListId);
+      const cancelScheduledSale = await client.post('/cancelScheduledSale', { session, coin, orderListId })
+      return await cancelScheduledSale.data;
     },
     minQty: async () => {
       const minQty = await client.post('/minQty', { symbol })

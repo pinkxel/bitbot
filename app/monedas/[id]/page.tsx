@@ -86,28 +86,81 @@ export default function Page({ params }: { params: { id: string } }) {
   }, [])
 
   const handleAutoSaleChange = (event) => {
-    console.log(event.target.checked)
-    setIsAutoSaleEnabled(event.target.checked)
+    console.log(event.target.checked);
+    if(isAutoSaleRunning) {
+      props.setOpenModal('pop-up'); props.setCaseModal('detener');
+    } else {
+      setIsAutoSaleEnabled(event.target.checked);
+    }
   };
 
   const handleCreateScheduledSale = async (apiKey : string, apiSecret : string, coin: string, schedule : any) => {
-      try {
-        const { earnAmount, loseAmount, reSaleTime } = schedule;
+    try {
+      const { earnAmount, loseAmount, reSaleTime } = schedule;
 
-        // Define the API endpoint
-        const apiEndpoint = "/api/scheduledSale";
+      // Define the API endpoint
+      const apiEndpoint = "/api/scheduledSale";
 
-        console.log("coin ### ", coin);
-    
+      console.log("coin ### ", coin);
+  
+      // Define the request body
+      const requestBody = {
+        session: { apiKey, apiSecret },
+        coin,
+        schedule,
+        userId
+      };
+
+      console.log('coin, schedule', coin, schedule);
+      // Make the API request
+      const response = await fetch(apiEndpoint, {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json"
+        },
+        body: JSON.stringify(requestBody)
+      });
+  
+      // Parse the response data
+      const data = await response.json();
+  
+      // Log the response data
+      console.log('Scheduled sale created', data);
+      
+      localStorage.setItem('isAutoSaleEnabled', JSON.stringify(isAutoSaleEnabled));
+      localStorage.setItem('earnAmount', JSON.stringify(earnAmount));
+      localStorage.setItem('loseAmount', JSON.stringify(loseAmount));
+      localStorage.setItem('reSaleTime', JSON.stringify(reSaleTime));
+
+      localStorage.setItem('userOrder', JSON.stringify(data));
+
+      setIsAutoSaleRunning(true);
+
+      fetchData()
+    } catch (error) {
+      console.error('Error creating scheduled sale', error);
+    }
+  }
+
+  const handleCancelScheduledSale = async (apiKey : string, apiSecret : string, coin: string, schedule : any) => {
+    try {
+      // Define the API endpoint
+      const apiEndpoint = "/api/cancelScheduledSale";
+      const userOrder = localStorage.getItem('userOrder');
+
+      if(userOrder) {
+        const orderListId = JSON.parse(userOrder).orderListId;
+        console.log('///////**/////////// orderListId', orderListId);
+
         // Define the request body
         const requestBody = {
           session: { apiKey, apiSecret },
+          orderListId,
           coin,
           schedule,
           userId
         };
-
-        console.log('coin, schedule', coin, schedule);
+        
         // Make the API request
         const response = await fetch(apiEndpoint, {
           method: "POST",
@@ -119,21 +172,25 @@ export default function Page({ params }: { params: { id: string } }) {
     
         // Parse the response data
         const data = await response.json();
-    
-        // Log the response data
-        console.log('Scheduled sale created', data);
+
+        console.log(data);
         
-        localStorage.setItem('isAutoSaleEnabled', JSON.stringify(isAutoSaleEnabled));
-        localStorage.setItem('earnAmount', JSON.stringify(earnAmount));
-        localStorage.setItem('loseAmount', JSON.stringify(loseAmount));
-        localStorage.setItem('reSaleTime', JSON.stringify(reSaleTime));
+        localStorage.removeItem('isAutoSaleEnabled');
+        localStorage.removeItem('earnAmount');
+        localStorage.removeItem('loseAmount');
+        localStorage.removeItem('reSaleTime');
+  
+        localStorage.removeItem('userOrder');
+
+        setIsAutoSaleRunning(false);
+        setIsAutoSaleEnabled(false);
 
         fetchData()
-      } catch (error) {
-        console.error('Error creating scheduled sale', error);
       }
+    } catch(error) {
+      console.error('Error canceling scheduled sale', error);
     }
-    
+  }
   
   return (
     <Card>
@@ -293,10 +350,13 @@ export default function Page({ params }: { params: { id: string } }) {
             </h3>
             <div className="flex justify-center gap-4">
               <Button onClick={() => {
+                console.log("props.caseModal", props.caseModal);
                 if(props.caseModal == 'crear') {
+                  console.log("handleCreateScheduledSale");
                   handleCreateScheduledSale(session.apiKey, session.apiSecret, params.id, { earnAmount, loseAmount, reSaleTime })
                 } else {
-                  /// TODO
+                  console.log("handleCancelScheduledSale");
+                  handleCancelScheduledSale(session.apiKey, session.apiSecret, params.id, { earnAmount, loseAmount, reSaleTime })
                 }
                 props.setOpenModal(undefined);
               }}>
@@ -309,21 +369,27 @@ export default function Page({ params }: { params: { id: string } }) {
           </div>
         </Modal.Body>
       </Modal>
-      <legend>
-        ¡Listo!
-      </legend>
-      <div className="flex">
-        <legend className="mb-4 w-64">
-        Se venderá con un {earnAmount}% de ganancia o un {loseAmount}% de pérdida.
-        Y se volverá a comprar y vender durante 1 hora.
-        </legend>
-      </div>
-      <div className="flex">
-        <Button color="gray" disabled={!isAutoSaleEnabled} 
-          onClick={() => {props.setOpenModal('pop-up'); props.setCaseModal('detener')}}>
-          Cancelar
-        </Button>
-      </div>
+      { isAutoSaleRunning && (
+        <div>
+          <legend>
+            ¡Listo!
+          </legend>
+          <div className="flex">
+            <legend className="mb-4 w-64">
+            Se venderá con un {earnAmount}% de ganancia o un {loseAmount}% de pérdida.
+            Y se volverá a comprar y vender durante 1 hora.
+            </legend>
+          </div>
+        </div>
+      )}
+      { isAutoSaleRunning && (
+        <div className="flex">
+          <Button color="gray" disabled={!isAutoSaleEnabled} 
+            onClick={() => {props.setOpenModal('pop-up'); props.setCaseModal('detener')}}>
+            Cancelar
+          </Button>
+        </div>
+      )}
     </Card>
   )
 }
