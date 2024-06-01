@@ -22,6 +22,8 @@ export default function Login() {
   const [apiKey, setApiKey] = useState('');
   const [apiSecret, setApiSecret] = useState('');
 
+  const [isLogin, setIsLogin] = useState(true);
+
   const handleUsernameChange = (event) => {
     setUsername(event.target.value);
   };
@@ -41,14 +43,13 @@ export default function Login() {
   const handleLogin = async (event) => {
     event.preventDefault();
     try {
-      const response = await axiosInstance.post('/api/login', { username, password, apiKey, apiSecret });
+      const response = await axiosInstance.post('/api/login', { username, password });
       if (response.status === 200) {
-        console.log('handleLogin response.data');
-        console.log(response.data);
         localStorage.setItem('userId', response.data.userData.userId);
-        localStorage.setItem('userOrder', response.data.userData.userOrder);
-        localStorage.setItem('apiKey', apiKey);
-        localStorage.setItem('apiSecret', apiSecret);
+        console.log(response.data);
+        if(response.data.userData.userOrder) {
+          localStorage.setItem('userOrder', response.data.userData.userOrder);
+        }
         router.push('/');
       } else {
         // Manejar errores de inicio de sesión aquí
@@ -64,14 +65,9 @@ export default function Login() {
     try {
       const response = await axiosInstance.post('/api/register', { username, password, apiKey, apiSecret });
       if (response.status === 200) {
-        console.log('handleRegister response.data');
-        console.log(response.data);
         localStorage.setItem('userId', response.data.userData.userId);
-        console.log("response.data.userData.userOrder", response.data.userData.userOrder);
         localStorage.setItem('userOrder', response.data.userData.userOrder);
         //localStorage.setItem('authToken', response.data.userData.authToken);
-        localStorage.setItem('apiKey', apiKey);
-        localStorage.setItem('apiSecret', apiSecret);
         router.push('/');
       } else {
         // Manejar errores de registro aquí
@@ -84,67 +80,80 @@ export default function Login() {
 
   return (
     <Card className="max-w-md">
-      <p>Ingreso con Binance</p>
+      <p>{ isLogin ? "Ingreso" : "Registro con Binance" }</p>
       <form className="flex flex-col gap-8">
+        { !isLogin && (
+          <>
+            <div>
+              <div className="mb-2 block">
+                <Label htmlFor="api-key" value="Tu API Key" />
+              </div>
+              <TextInput
+                id="user-key"
+                placeholder=""
+                required
+                type="text"
+                value={apiKey}
+                onChange={handleApiKeyChange}
+              />
+            </div>
+            <div>
+              <div className="mb-2 block">
+                <Label htmlFor="secret-key" value="Tu Secret Key" />
+              </div>
+              <TextInput
+                id="secret-key"
+                required
+                type="password"
+                value={apiSecret}
+                onChange={handleApiSecretChange}
+              />
+            </div>
+          </>
+        )}
         <div>
           <div className="mb-2 block">
-            <Label htmlFor="api-key" value="Tu API Key" />
+            <Label htmlFor="username" value="Nombre de usuario" />
           </div>
           <TextInput
-            id="user-key"
-            placeholder=""
+            id="username"
             required
             type="text"
-            value={apiKey}
-            onChange={handleApiKeyChange}
+            value={username}
+            onChange={handleUsernameChange}
           />
         </div>
         <div>
           <div className="mb-2 block">
-            <Label htmlFor="secret-key" value="Tu Secret Key" />
+            <Label htmlFor="password" value="Contraseña" />
           </div>
           <TextInput
-            id="secret-key"
+            id="password"
             required
             type="password"
-            value={apiSecret}
-            onChange={handleApiSecretChange}
+            value={password}
+            onChange={handlePasswordChange}
           />
         </div>
-        <div>
-        <div className="mb-2 block">
-          <Label htmlFor="username" value="Nombre de usuario" />
-        </div>
-        <TextInput
-          id="username"
-          required
-          type="text"
-          value={username}
-          onChange={handleUsernameChange}
-        />
-      </div>
-      <div>
-        <div className="mb-2 block">
-          <Label htmlFor="password" value="Contraseña" />
-        </div>
-        <TextInput
-          id="password"
-          required
-          type="password"
-          value={password}
-          onChange={handlePasswordChange}
-        />
-      </div>
         {/* <div className="flex items-center gap-2">
           <Checkbox id="remember" />
           <Label htmlFor="remember">Remember me</Label>
         </div> */}
-        <Button type="submit" onClick={handleLogin}>
-          Ingresar
-        </Button>
-        <Button type="button" onClick={handleRegister}>
-          Registrarse
-        </Button>
+        { isLogin && (
+          <Button type="submit" onClick={handleLogin}>
+            Ingresar
+          </Button>
+        )}
+        { !isLogin && (
+          <Button type="button" onClick={handleRegister}>
+            Registrarse
+          </Button>
+        )}
+        { isLogin && (
+          <Button color="gray" type="button" onClick={()=>{ setIsLogin(false) }}>
+            Nuevo usuario
+          </Button>
+        )}
       </form>
     </Card>
   );

@@ -13,9 +13,14 @@ export default function Cuenta() {
     try {
       console.log('porinponpin');
       const response = await axios.post('/api/logout', {});
+      console.log('document.cookie', response.status);
       if (response.status === 200) {
-        localStorage.removeItem('apiKey');
-        localStorage.removeItem('apiSecret');
+        /* localStorage.removeItem('apiKey');
+        localStorage.removeItem('apiSecret'); */
+        // Borrar todas las cookies
+        console.log('RESSSSSS', JSON.stringify(document.cookie));
+        // Borrar todo el localStorage
+        localStorage.clear();
         window.location.reload()
       } else {
         // Manejar errores de cierre de sesión aquí

@@ -2,17 +2,31 @@
 import axios from 'axios';
 import { NextResponse } from 'next/server'
 
-const api = axios.create({
-  // Configura Axios para enviar cookies con cada solicitud
-  withCredentials: true,
-  baseURL: 'http://localhost'
-});
-
 export async function POST(request: Request, { params }: { params: { call: string }}) {
+  const sessionCookie = request.headers.get('cookie');
+  console.log("!!!!!!!!!!!! sessionCookie:", sessionCookie);
+  const api = axios.create({
+    // Configura Axios para enviar cookies con cada solicitud
+    baseURL: 'http://localhost',
+    headers: {
+      'Cookie': sessionCookie // Asegúrate de enviar la cookie de sesión
+    },
+    withCredentials: true
+  });
+
+  const apiX = axios.create({
+  // Configura Axios para enviar cookies con cada solicitud
+  baseURL: 'http://localhost:5000',
+  headers: {
+    'Cookie': sessionCookie // Asegúrate de enviar la cookie de sesión
+  },
+  withCredentials: true
+  });
+
   const req = await request.json();
   const { call } = params;
   // Obtener la sesión del usuario
-  const session = { apiKey: process.env.KEY, apiSecret: process.env.SECRET }
+  //const session = { apiKey: process.env.KEY, apiSecret: process.env.SECRET }
 
   const { 
     coin,
@@ -27,7 +41,14 @@ export async function POST(request: Request, { params }: { params: { call: strin
     apiSecret
   } = req;
 
-  const client = axios.create({ baseURL:'/', headers: { 'X-API-KEY': session.apiKey, 'X-API-SECRET': session.apiSecret } })
+  /*const client = axios.create({
+    baseURL: '/',
+    headers: {
+      'X-API-KEY': session.apiKey,
+      'X-API-SECRET': session.apiSecret
+    },
+    withCredentials: true
+  });*/
 
   const ip = request.headers.get('x-real-ip')
   console.log(`La dirección IP de la solicitud es ${ip}`)
@@ -41,7 +62,12 @@ export async function POST(request: Request, { params }: { params: { call: strin
           console.log('API login data');
           // Asumiendo que la respuesta es JSON y no necesita ser parseada
           console.log(loginResponse.data);
+
+          // Mostrar las cookies en la consola
+          const sessionCookie = loginResponse.headers['set-cookie'];
+
           return {
+            sessionCookie: sessionCookie,
             status: 200,
             message: 'Inicio de sesión exitoso',
             userData: {
@@ -61,7 +87,7 @@ export async function POST(request: Request, { params }: { params: { call: strin
     },
 
     // Cierre de sesión
-    logout: async () => {
+    logout: async (res: any) => {
       console.log('hasta acá');
       await axios.post('/logout');
       return { status: 200, message: 'Sesión cerrada con éxito' };
@@ -86,7 +112,7 @@ export async function POST(request: Request, { params }: { params: { call: strin
 
           return {
             sessionCookie: sessionCookie,
-            message: 'Inicio de sesión exitoso',
+            message: 'Registro de usuario exitoso',
             userData: {
               userId: response.data.userId,
               userOrder: response.data.userOrder,
@@ -106,28 +132,28 @@ export async function POST(request: Request, { params }: { params: { call: strin
 
     balance: async () => {
       // Obtener el balance del usuario
-      const balance = await client.post('/balance', {session})
+      const balance = await api.post('/balance')
       return await balance.data;
     },
     balances: async () => {
       // Obtener el balance del usuario
-      const balances = await client.post('/balances', {session})
+      const balances = await api.post('/balances')
       return await balances.data;
     },    
     balanceOf: async () => {
       // Obtener el balance de una moneda específica
-      const balance = await client.post('/balanceOf', { session, coin })
+      const balance = await api.post('/balanceOf', { coin })
       return await balance.data;
     },
     available: async () => {
       // Obtener el disponible de una moneda específica
-      const balance = await client.post('/available', { session, coin })
+      const balance = await api.post('/available', { coin })
       return await balance.data;
     },
     buy: async () => {
       try {
         // Comprar una moneda
-        const buy = await client.post('/buy', { session, coin, amount });
+        const buy = await api.post('/buy', { coin, amount });
         console.log(buy);
         return await buy.data;
       } catch (error) {
@@ -146,7 +172,7 @@ export async function POST(request: Request, { params }: { params: { call: strin
     sell: async () => {
       try {
         // Vender una moneda
-        const sell = await client.post('/sell', { session, coin, amount })
+        const sell = await api.post('/sell', { coin, amount })
         return await sell.data;
       } catch (error) {
         console.error('Error al comprar: NEW', );
@@ -163,28 +189,34 @@ export async function POST(request: Request, { params }: { params: { call: strin
     },
     coins: async () => {
       // Comprar una moneda
-      const coins = await client.post('/coins')
+      const coins = await api.post('/coins')
       return await coins.data;
     },
     coin: async () => {
       // Vender una moneda
-      const resCoin = await client.post('/coin', { coin })
+      const resCoin = await api.post('/coin', { coin })
       return await resCoin.data;
     },
     scheduledSale: async () => {
       // Programar una venta programada
-      const scheduleSale = await client.post('/scheduledSale', { session, coin, schedule, userId })
+      const scheduleSale = await api.post('/scheduledSale', { coin, schedule, userId })
       return await scheduleSale.data;
     },
     cancelScheduledSale: async () => {
       // Cancelar una venta programada
       console.log("orderListId", orderListId);
-      const cancelScheduledSale = await client.post('/cancelScheduledSale', { session, coin, orderListId })
+      const cancelScheduledSale = await api.post('/cancelScheduledSale', { coin, orderListId, userId }, {
+        withCredentials: true // Asegúrate de que esta opción esté habilitada
+      });
       return await cancelScheduledSale.data;
     },
     minQty: async () => {
-      const minQty = await client.post('/minQty', { symbol })
+      const minQty = await api.post('/minQty', { symbol })
       return await minQty.data;
+    },
+    x: async () => {
+      const x = await apiX.post('/x', {} )
+      return await x.data;
     }
   }
 
@@ -203,8 +235,16 @@ export async function POST(request: Request, { params }: { params: { call: strin
       'Content-Type': 'application/json', // Tipo de contenido
     }, 
   };
+
+  console.log('APIIIIIII', call[0]);
   
-  if(resCall) {
+  if (call[0] === 'logout') {
+    // Ajustar la cabecera 'Set-Cookie' para borrar la cookie 'connect.sid'
+    console.log('aaaaaaaa');
+    res.headers['Set-Cookie'] = 'connect.sid=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly;';
+  } else if (resCall) {
+    console.log('bbbbb');
+    // Para otras llamadas que devuelven una cookie
     res.headers['Set-Cookie'] = resCall.sessionCookie; // Establecer la cookie
   }
 

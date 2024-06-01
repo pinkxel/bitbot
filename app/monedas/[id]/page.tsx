@@ -42,7 +42,7 @@ export default function Page({ params }: { params: { id: string } }) {
           headers: {
             'Content-type': 'application/json'
           },
-          body: JSON.stringify({session: { apiKey, apiSecret }, coin: id})
+          body: JSON.stringify({coin: id})
         });
         const data = await response.json();
         console.log('Balances', data)
@@ -58,7 +58,7 @@ export default function Page({ params }: { params: { id: string } }) {
           headers: {
             'Content-type': 'application/json'
           },
-          body: JSON.stringify({session: { apiKey, apiSecret }, coin: id})
+          body: JSON.stringify({coin: id})
         });
         const data = await response.json();
         console.log('BalanceOf', data);
@@ -81,6 +81,7 @@ export default function Page({ params }: { params: { id: string } }) {
     setLoseAmount(JSON.parse(localStorage.getItem('loseAmount') || '0'));
     setLoseAmountText(JSON.parse(localStorage.getItem('loseAmount') || '0'));
     setreSaleTime(JSON.parse(localStorage.getItem('reSaleTime') || '0'));
+    setreSaleTimeText(JSON.parse(localStorage.getItem('reSaleTime') || '0'));
 
     fetchData();
   }, [])
@@ -105,7 +106,6 @@ export default function Page({ params }: { params: { id: string } }) {
   
       // Define the request body
       const requestBody = {
-        session: { apiKey, apiSecret },
         coin,
         schedule,
         userId
@@ -154,7 +154,6 @@ export default function Page({ params }: { params: { id: string } }) {
 
         // Define the request body
         const requestBody = {
-          session: { apiKey, apiSecret },
           orderListId,
           coin,
           schedule,
@@ -231,7 +230,7 @@ export default function Page({ params }: { params: { id: string } }) {
       />
       <TextInput disabled={!isAutoSaleEnabled || isAutoSaleRunning}
         id="earnAmountTextInput"
-        placeholder="--"
+        placeholder="----"
         value={earnAmountText}
         onChange={(event) => {
           const value = event.target.value;
@@ -270,7 +269,7 @@ export default function Page({ params }: { params: { id: string } }) {
       />
       <TextInput disabled={!isAutoSaleEnabled || isAutoSaleRunning}
         id="loseAmountTextInput"
-        placeholder="--"
+        placeholder="----"
         value={loseAmountText}
         onChange={(event) => {
           //console.log(event.target.value)
@@ -377,7 +376,7 @@ export default function Page({ params }: { params: { id: string } }) {
           <div className="flex">
             <legend className="mb-4 w-64">
             Se venderá con un {earnAmount}% de ganancia o un {loseAmount}% de pérdida.
-            Y se volverá a comprar y vender durante 1 hora.
+            Y se volverá a comprar y vender durante {reSaleTime} segundos.
             </legend>
           </div>
         </div>
@@ -390,6 +389,20 @@ export default function Page({ params }: { params: { id: string } }) {
           </Button>
         </div>
       )}
+      { /*
+      <Button color="gray" onClick={ async () => {
+              const response = await fetch('/api/x', {
+                method: "POST",
+                headers: {
+                  "Content-type": "application/json"
+                },
+                body: JSON.stringify('')
+              });
+              console.log(response)
+
+      }}>
+        Test
+    </Button> */}
     </Card>
   )
 }
