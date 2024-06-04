@@ -11,7 +11,7 @@ export default function Login() {
   const axiosInstance = axios.create({
     withCredentials: true,
     // Asegúrate de que la URL base sea correcta y permita credenciales
-    baseURL: 'http://localhost:3000'
+    baseURL: '/'
   });
 
   const router = useRouter();

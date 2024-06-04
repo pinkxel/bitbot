@@ -4,30 +4,29 @@ import { NextResponse } from 'next/server'
 
 export async function POST(request: Request, { params }: { params: { call: string }}) {
   const sessionCookie = request.headers.get('cookie');
-  console.log("!!!!!!!!!!!! sessionCookie:", sessionCookie);
+  //console.log("sessionCookie:", sessionCookie);
+
   const api = axios.create({
     // Configura Axios para enviar cookies con cada solicitud
-    baseURL: 'http://localhost',
+    baseURL: process.env.API,
     headers: {
       'Cookie': sessionCookie // Asegúrate de enviar la cookie de sesión
     },
     withCredentials: true
   });
 
-  const apiX = axios.create({
+  /* const apiX = axios.create({
   // Configura Axios para enviar cookies con cada solicitud
   baseURL: 'http://localhost:5000',
   headers: {
-    'Cookie': sessionCookie // Asegúrate de enviar la cookie de sesión
+    'Cookie': sessionCookie
   },
   withCredentials: true
-  });
+  }); */
 
   const req = await request.json();
   const { call } = params;
-  // Obtener la sesión del usuario
-  //const session = { apiKey: process.env.KEY, apiSecret: process.env.SECRET }
-
+  
   const { 
     coin,
     amount,
@@ -213,19 +212,19 @@ export async function POST(request: Request, { params }: { params: { call: strin
     minQty: async () => {
       const minQty = await api.post('/minQty', { symbol })
       return await minQty.data;
-    },
+    }/* ,
     x: async () => {
       const x = await apiX.post('/x', {} )
       return await x.data;
-    }
+    } */
   }
 
   const reqCall = calls[call];
   //const res = req.amount != '' ? await reqCall(req.coin, req.amount) : await reqCall();
   const resCall = await reqCall();
 
-  console.log("/////////////////// resCall");
-  console.log(resCall, call);
+  //console.log("resCall");
+  //console.log(resCall, call);
 
   //const resCall = call === 'register' ? await reqCall(res) : await reqCall();
   
@@ -235,15 +234,11 @@ export async function POST(request: Request, { params }: { params: { call: strin
       'Content-Type': 'application/json', // Tipo de contenido
     }, 
   };
-
-  console.log('APIIIIIII', call[0]);
   
   if (call[0] === 'logout') {
     // Ajustar la cabecera 'Set-Cookie' para borrar la cookie 'connect.sid'
-    console.log('aaaaaaaa');
     res.headers['Set-Cookie'] = 'connect.sid=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly;';
   } else if (resCall) {
-    console.log('bbbbb');
     // Para otras llamadas que devuelven una cookie
     res.headers['Set-Cookie'] = resCall.sessionCookie; // Establecer la cookie
   }
