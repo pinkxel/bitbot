@@ -86,7 +86,7 @@ export async function POST(request: Request, { params }: { params: { call: strin
 
     // Cierre de sesión
     logout: async (res: any) => {
-      console.log('hasta acá');
+      //console.log('hasta acá');
       await axios.post('/logout');
       return { status: 200, message: 'Sesión cerrada con éxito' };
     },

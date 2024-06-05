@@ -2,8 +2,11 @@
 
 import { Card, Button } from 'flowbite-react';
 import axios from 'axios';
+import { useRouter } from 'next/navigation';
 
 export default function Cuenta() {
+  const router = useRouter();
+
   /*const clearSession = () => {
     localStorage.clear()
     window.location.reload()
@@ -11,17 +14,17 @@ export default function Cuenta() {
 
   const clearSession = async () => {
     try {
-      console.log('porinponpin');
       const response = await axios.post('/api/logout', {});
       console.log('document.cookie', response.status);
       if (response.status === 200) {
         /* localStorage.removeItem('apiKey');
         localStorage.removeItem('apiSecret'); */
         // Borrar todas las cookies
-        console.log('RESSSSSS', JSON.stringify(document.cookie));
+        console.log('cookie', JSON.stringify(document.cookie));
         // Borrar todo el localStorage
         localStorage.clear();
-        window.location.reload()
+
+        router.push('/');
       } else {
         // Manejar errores de cierre de sesión aquí
       }
