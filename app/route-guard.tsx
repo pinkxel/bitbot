@@ -12,9 +12,8 @@ function RouteGuard({ children }) {
     const checkSessionCookie = () => {
       const sessionCookie = Cookies.get('connect.sid'); // Busca la cookie 'connect.sid'
 
-      console.log("/////////////////!sessionCookie");
-      console.log(sessionCookie);
-      console.log(!sessionCookie);
+      //console.log("sessionCookie");
+      //console.log(sessionCookie);
       // Si no hay cookie de sesión 'connect.sid', redirige al usuario a la página de inicio de sesión
       if (!sessionCookie) {
         router.push('/login');

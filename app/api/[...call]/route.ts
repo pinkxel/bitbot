@@ -58,9 +58,8 @@ export async function POST(request: Request, { params }: { params: { call: strin
       try {
         const loginResponse = await api.post('/login', { username, password });
         if (loginResponse.status === 200) {
-          console.log('API login data');
           // Asumiendo que la respuesta es JSON y no necesita ser parseada
-          console.log(loginResponse.data);
+          //console.log('loginResponse.data.userOrder', loginResponse.data.userOrder);
 
           // Mostrar las cookies en la consola
           const sessionCookie = loginResponse.headers['set-cookie'];
@@ -71,7 +70,7 @@ export async function POST(request: Request, { params }: { params: { call: strin
             message: 'Inicio de sesión exitoso',
             userData: {
               userId: loginResponse.data.userId,
-              userOrder: loginResponse.data.userOrder
+              userOrder: JSON.stringify(loginResponse.data.userOrder)
             }
           };
         }

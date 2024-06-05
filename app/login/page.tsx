@@ -46,9 +46,19 @@ export default function Login() {
       const response = await axiosInstance.post('/api/login', { username, password });
       if (response.status === 200) {
         localStorage.setItem('userId', response.data.userData.userId);
-        console.log(response.data);
+        console.log('response.data', response.data);
+        
         if(response.data.userData.userOrder) {
-          localStorage.setItem('userOrder', response.data.userData.userOrder);
+          const userOrderStringify = response.data.userData.userOrder;
+          localStorage.setItem('userOrder', userOrderStringify);
+          
+          const userOrder = JSON.parse(userOrderStringify);
+
+          localStorage.setItem('isAutoSaleEnabled', JSON.stringify(true));
+          localStorage.setItem('earnAmount', JSON.stringify(userOrder.schedule.earnAmount));
+          localStorage.setItem('loseAmount', JSON.stringify(userOrder.schedule.loseAmount));
+          localStorage.setItem('reSaleTime', JSON.stringify(userOrder.schedule.reSaleTime));
+
         }
         router.push('/');
       } else {

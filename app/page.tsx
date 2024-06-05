@@ -28,7 +28,7 @@ export default function Inicio() {
           body: JSON.stringify({session: { apiKey, apiSecret }})
         });
         const data = await response.json();
-        console.log('#Balance!&&&', data)
+        console.log('Balance', data)
         setBalance(data.toFixed(2));
       } catch (error) {
         console.error(error);

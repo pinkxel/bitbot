@@ -150,7 +150,7 @@ export default function Page({ params }: { params: { id: string } }) {
 
       if(userOrder) {
         const orderListId = JSON.parse(userOrder).orderListId;
-        console.log('///////**/////////// orderListId', orderListId);
+        console.log('orderListId', orderListId);
 
         // Define the request body
         const requestBody = {

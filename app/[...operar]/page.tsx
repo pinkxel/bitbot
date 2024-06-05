@@ -123,8 +123,7 @@ export default function Page({ params }: { params: { operar: string } }) {
       // Obtener la respuesta de la API y mostrarla por consola
       const data = await response.json();
       if(data.error) {
-        console.log("data//////")
-        console.log(data)
+        console.log('data', data)
         props.setOpenErrorModalMessage(data.error + ' Pruebe con un valor mayor o igual a ' + data.minNotional);
         props.setOpenErrorModal('pop-up-error');
       }
