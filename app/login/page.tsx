@@ -48,17 +48,15 @@ export default function Login() {
         localStorage.setItem('userId', response.data.userData.userId);
         console.log('response.data', response.data);
         
-        if(response.data.userData.userOrder) {
-          const userOrderStringify = response.data.userData.userOrder;
-          localStorage.setItem('userOrder', userOrderStringify);
-          
-          const userOrder = JSON.parse(userOrderStringify);
+        const userOrderStringify = response.data.userData.userOrder;
+        const userOrder = JSON.parse(userOrderStringify);
 
+        if(userOrder.schedule) {
+          localStorage.setItem('userOrder', userOrderStringify);
           localStorage.setItem('isAutoSaleEnabled', JSON.stringify(true));
           localStorage.setItem('earnAmount', JSON.stringify(userOrder.schedule.earnAmount));
           localStorage.setItem('loseAmount', JSON.stringify(userOrder.schedule.loseAmount));
           localStorage.setItem('reSaleTime', JSON.stringify(userOrder.schedule.reSaleTime));
-
         }
         router.push('/');
       } else {
