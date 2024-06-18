@@ -112,6 +112,8 @@ export default function Page({ params }: { params: { operar: string } }) {
         throw new Error("Operación inválida");
       }
 
+      console.log('CLIENT', coin, amount);
+
       // Llamar a la API con los datos necesarios
       const response = await fetch(apiRoute, {
         method: "POST",

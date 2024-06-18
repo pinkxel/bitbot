@@ -174,6 +174,7 @@ export default function Page({ params }: { params: { id: string } }) {
 
         console.log(data);
         
+        console.log('removing');
         localStorage.removeItem('isAutoSaleEnabled');
         localStorage.removeItem('earnAmount');
         localStorage.removeItem('loseAmount');
